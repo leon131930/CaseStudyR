@@ -17,8 +17,6 @@ case[, .N, by=group]
 summary(patientinfo)
 
 
-#time: shows accumulated number of tests etc. -> not used for search
-
 #plot daily cases per day:
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
 ggplot(patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line()
@@ -29,14 +27,14 @@ searchtrend[date >= "2020-01-01"] %>%
   ggplot(aes(x=date, y=coronavirus)) + geom_line()
 colnames(patientinfo)
 
-#merge patientinfo and searchtrend
-  #rename confirmed_date to date
+
+#rename confirmed_date to date (otherwise not able to join)
 patientinfo[, date := sub("confirmed_date", "date", confirmed_date)]
-  #change date class to "IDate"
+#change date class to "IDate"
 patientinfo[, date:= as.IDate(date)]
 class(patientinfo$date)
 
-#full outer merge of patientinfo and searchtrend
+#full outer join of patientinfo and searchtrend
 search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
 colnames(search_patient)
 summary(search_patient)
