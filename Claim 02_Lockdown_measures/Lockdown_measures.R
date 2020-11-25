@@ -35,18 +35,30 @@ ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
   labs(x = "confirmed date", y = "nb. infection cases (immigration)")
 
 
-#Germany
-patientinfo2 <- patientinfo[, .N, by = confirmed_date]
-patientinfo2[1:100]
+#Germany --- is not working yet! ------
+
+#total cases in Korea per day
+totalCases_perDay <- patientinfo[, .N, by = confirmed_date]
+setnames(totalCases_perDay, "N", "cases Korea")
+totalCases_perDay <- totalCases_perDay[, date := NULL]
+head(totalCases_perDay)
 
 RKI_data <- fread("./extData/DE_InfectionCases.csv")
-RKI_data1 <- RKI_data[,c("Berichtsdatum", "Anzahl COVID-19-Fälle")]
+RKI_data <- RKI_data[, "Anzahl COVID-19-Fälle kumuliert" := NULL]
+RKI_data
 
-RKI_data1 <- RKI_data1[, confirmed_date := as.Date(Berichtsdatum, format ="%d.%m.%y")]
+RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(Berichtsdatum, format ="%d.%m.%y")]
+#change date class to "IDate"
+RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
+RKI_data_UsFormat <- RKI_data_UsFormat[, Berichtsdatum := NULL]
+RKI_data_UsFormat
+class(RKI_data_UsFormat$confirmed_date)
 
-comp_Germany <- merge(RKI_data1, patientinfo2, by = "confirmed_date", all = FALSE)
 
-
+merge_GermanyUS <- merge(RKI_data_UsFormat, totalCases_perDay, 
+                         by = "confirmed_date", all = FALSE)
+merge_GermanyUS <- merge_GermanyUS[confirmed_date >= 2020-02-25]
+merge_GermanyUS
 
 
 
