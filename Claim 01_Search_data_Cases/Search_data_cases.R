@@ -49,5 +49,5 @@ ggplot(search_patientsubset, aes(x=date)) +
   geom_line(aes(y=coronavirus, colour = "coronavirus")) +
   geom_line(aes(y=flu*100, colour = "flu")) 
 #+geom_line(aes(y=pneumonia*10, colour = "pneumonia"))
-#wtf
+
 
