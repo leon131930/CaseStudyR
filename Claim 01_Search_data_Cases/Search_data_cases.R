@@ -52,5 +52,5 @@ ggplot(search_patientsubset, aes(x=date)) +
   geom_line(aes(y=coronavirus, colour = "coronavirus")) +
   geom_line(aes(y=flu*100, colour = "flu")) 
 #+geom_line(aes(y=pneumonia*10, colour = "pneumonia"))
-
+#---Problem --- Search volume for Flu and Pneumonia is very small (what data unit?) -> Challenging to compare with daily cases
 
