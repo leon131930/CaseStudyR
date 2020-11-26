@@ -18,10 +18,9 @@ ggplot(amount_perPolicy, aes(x = N , y = reorder(type,N))) +
 
 
 # plot total number of infection cases from Jan - Jul per day 
-patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
-ggplot(patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+ggplot(time, aes(x=confirmed_date, y=daily_cases)) +
   geom_line()
-
 
 
 #Further hot spots to inspect in terms of effect of different domestic policies
