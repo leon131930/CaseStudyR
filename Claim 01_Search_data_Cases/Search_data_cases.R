@@ -24,7 +24,10 @@ ggplot(patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line()
 
 # plot search data for "coronavirus" search
 searchtrend[date >= "2020-01-01"] %>%
-  ggplot(aes(x=date, y=coronavirus)) + geom_line()
+  ggplot(aes(x=date)) +
+  geom_line(aes(y=coronavirus, colour = "coronavirus")) +
+  geom_line(aes(x=date, y=flu, colour = "flu")) + 
+  geom_line(aes(x=date, y=pneumonia, colour = "pneumonia"))
 colnames(patientinfo)
 
 
