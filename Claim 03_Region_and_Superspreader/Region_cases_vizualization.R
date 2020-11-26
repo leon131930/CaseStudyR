@@ -1,9 +1,10 @@
 ### Region visualization ###
 
+install.packages("maps")
 library(magrittr)
 library(data.table)
 library(ggplot2)
-library(ggmap)
+library(maps)
 
 # importing Case
 case <- fread("./extData/Case.csv")
@@ -18,4 +19,6 @@ case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 
 # plot
 ggplot(case, aes(x=latitude, y=longitude)) +
-  geom_point(aes(size=confirmed))       
+  geom_point(aes(size=confirmed))
+
+  
