@@ -1,3 +1,15 @@
+library(magrittr)
+library(data.table)
+library(ggplot2)
+
+
+# import files: Time, policy
+time <- fread("./extData/Time.csv")
+policy <- fread("./extData/Policy.csv")
+
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+
 
 
 health_policy <- policy[type == "Health"]
