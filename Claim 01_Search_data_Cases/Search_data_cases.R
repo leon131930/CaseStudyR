@@ -38,7 +38,7 @@ class(patientinfo$date)
 search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
 colnames(search_patient)
 summary(search_patient)
-
+?shift
 
 #subset search_patient to Jan-March 2020
 search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01"]
@@ -46,4 +46,7 @@ search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01
 # plot final with two graphs:
 ggplot(search_patientsubset, aes(x=date)) +
   geom_line(aes(y=daily_cases, colour = "daily_cases")) +
-  geom_line(aes(y=coronavirus, colour = "coronavirus"))
+  geom_line(aes(y=coronavirus, colour = "coronavirus")) +
+  geom_line(aes(y=flu*100, colour = "flu")) 
+#+geom_line(aes(y=pneumonia*10, colour = "pneumonia"))
+
