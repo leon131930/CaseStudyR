@@ -11,7 +11,7 @@ time <- fread("./extData/Time.csv")
 #-----------------------inspect data-------------------------------------------
 
 #total number of infection cases due to immigration
-contact_overseas <- patient_Info[infection_case == "overseas inflow", 
+contact_overseas <- patientinfo[infection_case == "overseas inflow", 
                                  .N, by = "confirmed_date"]
 contact_overseas[1:10]
 
