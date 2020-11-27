@@ -9,10 +9,10 @@ library(maps)
 # importing Case
 case <- fread("./extData/Case.csv")
 
-#subsetting to remove empty values
+#subsetting to remove empty values (no coordinates)
 case <- case[longitude != "-"]
 
-# change data type to double
+# change data type from character to double
 case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 head(case)
 
