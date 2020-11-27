@@ -21,9 +21,9 @@ ggplot(case, aes(x=latitude, y=longitude)) +
   geom_point(aes(size=confirmed, col=province)) +
   scale_x_continuous(labels = scales::comma)+  #to show comma numbers
   scale_y_continuous(labels = scales::comma)+  # to show comma numbers
-  labs(title = "Covid-cases mapped")
+  labs(title = "Confirmed Covid-cases mapped")
 
 # to add here: Map of SouthKorea -> Library to import Map Data? -> Maybe just use Region table for coordinates of cities, and display them on top?
-
+# Possible to increase dot size?
 
 
