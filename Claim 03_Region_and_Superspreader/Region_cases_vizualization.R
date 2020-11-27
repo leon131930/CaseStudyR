@@ -14,10 +14,16 @@ case <- case[longitude != "-"]
 
 # change data type to double
 case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
-
+head(case)
 
 # plot coordinates with cases, different size
 ggplot(case, aes(x=latitude, y=longitude)) +
-  geom_point(aes(size=confirmed))
+  geom_point(aes(size=confirmed, col=province)) +
+  scale_x_continuous(labels = scales::comma)+  #to show comma numbers
+  scale_y_continuous(labels = scales::comma)+  # to show comma numbers
+  labs(title = "Covid-cases mapped")
 
-#use scale_y_continuous() to display coordinates better??
+# to add here: Map of SouthKorea -> Library to import Map Data? -> Maybe just use Region table for coordinates of cities, and display them on top?
+
+
+
