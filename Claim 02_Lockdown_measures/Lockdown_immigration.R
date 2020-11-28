@@ -3,7 +3,7 @@ library(data.table)
 library(ggplot2)
 
 
-# import files: Time, policy
+# import files: Time, Policy
 time <- fread("./extData/Time.csv")
 policy <- fread("./extData/Policy.csv")
 
