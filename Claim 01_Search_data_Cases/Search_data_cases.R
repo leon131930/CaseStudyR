@@ -16,7 +16,6 @@ dim(patientinfo)
 case[, .N, by=group]
 summary(patientinfo)
 
-
 #plot daily cases per day:
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
 ggplot(patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line()
@@ -38,7 +37,6 @@ class(patientinfo$date)
 search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
 colnames(search_patient)
 summary(search_patient)
-
 
 #subset search_patient to Jan-March 2020
 search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01"]
