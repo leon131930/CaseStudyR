@@ -14,7 +14,6 @@ summary(time)
 
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-
 time[, confirmed_date:= as.IDate(confirmed_date)]
 ggplot(time, aes(x=confirmed_date, y=daily_cases)) +
   geom_line()
