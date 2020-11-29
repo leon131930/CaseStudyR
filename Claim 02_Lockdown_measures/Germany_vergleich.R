@@ -17,7 +17,8 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) +
 RKI_data <- RKI_data[, "Anzahl COVID-19-Fälle kumuliert" := NULL]
 RKI_data
 
-RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(Berichtsdatum, format ="%d.%m.%y")]
+RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(Berichtsdatum, 
+                                                          format ="%d.%m.%y")]
 #change date class to "IDate"
 RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
 RKI_data_UsFormat <- RKI_data_UsFormat[, Berichtsdatum := NULL]
@@ -30,8 +31,12 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 
 
 # plot
-ggplot(merge_GermanyUS, aes(x=confirmed_date)) + geom_line(aes(y=`daily_cases`,color="Germany"))+
-  geom_line(aes(y=`Anzahl Covid-Fälle pro Tag`,color="South Korea")) + labs(x= "confirmed date", y="daily cases")+
-  geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),ymin=860,ymax=890,color="18 days"))+
-  geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),ymin=6400,ymax=6430,color="61 days"))
+ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
+  geom_line(aes(y=`daily_cases`,color="Germany"))+
+  geom_line(aes(y=`Anzahl Covid-Fälle pro Tag`,color="South Korea")) + 
+  labs(x= "confirmed date", y="daily cases")+
+  geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
+                ymin=860,ymax=890,color="18 days"))+
+  geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
+                ymin=6400,ymax=6430,color="61 days"))
 

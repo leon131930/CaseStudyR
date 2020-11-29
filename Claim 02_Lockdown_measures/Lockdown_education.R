@@ -42,12 +42,14 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
                 ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
-  geom_text(aes(x = as.Date('2020-02-29'), y = 860, label = "Strong Social distancing campaign"),
+  geom_text(aes(x = as.Date('2020-02-29'), 
+                y = 860, label = "Strong Social distancing campaign"),
             size = 3, vjust = 0, hjust = 0, color = "blue")+
   
   geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
                 ymin=840,ymax=843,color="Weak social\ndistancing campaign"))+
-  geom_text(aes(x = as.Date('2020-05-01'), y = 860, label = "Weak social distancing campaign"),
+  geom_text(aes(x = as.Date('2020-05-01'), 
+                y = 860, label = "Weak social distancing campaign"),
             size = 3, vjust = 0, hjust = 0, color = "purple")+
   
   #social policies
