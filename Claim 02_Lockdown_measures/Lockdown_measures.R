@@ -11,7 +11,7 @@ time <- fread("./extData/Time.csv")
 #-----------------------inspect data-------------------------------------------
 
 #total number of infection cases due to immigration
-contact_overseas <- patient_Info[infection_case == "overseas inflow", 
+contact_overseas <- patientinfo[infection_case == "overseas inflow", 
                                  .N, by = "confirmed_date"]
 contact_overseas[1:10]
 
@@ -23,43 +23,23 @@ IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
 IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
 IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
 
-#plot nb infection cases of immigration per day + start date of immigration policies
 
-ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
-  geom_vline(data = IP_Special, aes(xintercept = start_date, color = "Immigration\nprocedure"), 
+#1. Run plot and safe it in overseas_plot
+#2. Go to file "Lockdown_immigration" and run the code at the very end to get
+#the figure
+
+
+overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
+  geom_vline(data = IP_Special, aes(xintercept = start_date, 
+                                    color = "Immigration\nprocedure"), 
              linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_14Day, aes(xintercept = start_date, color = "Self quarantine"), 
+  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
+                                  color = "Self quarantine"), 
              linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_ManTest, aes(xintercept = start_date, color = "Diagnostic Test\nUS"), 
+  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
+                                    color = "Diagnostic Test\nUS"), 
              linetype = "longdash", show.legend = TRUE) +
   labs(x = "confirmed date", y = "nb. infection cases (immigration)")
-
-
-#Germany --- is not working yet! ------
-
-#total cases in Korea per day
-totalCases_perDay <- patientinfo[, .N, by = confirmed_date]
-setnames(totalCases_perDay, "N", "cases Korea")
-totalCases_perDay <- totalCases_perDay[, date := NULL]
-head(totalCases_perDay)
-
-RKI_data <- fread("./extData/DE_InfectionCases.csv")
-RKI_data <- RKI_data[, "Anzahl COVID-19-Fälle kumuliert" := NULL]
-RKI_data
-
-RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(Berichtsdatum, format ="%d.%m.%y")]
-#change date class to "IDate"
-RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
-RKI_data_UsFormat <- RKI_data_UsFormat[, Berichtsdatum := NULL]
-RKI_data_UsFormat
-class(RKI_data_UsFormat$confirmed_date)
-
-
-merge_GermanyUS <- merge(RKI_data_UsFormat, totalCases_perDay, 
-                         by = "confirmed_date", all = FALSE)
-merge_GermanyUS <- merge_GermanyUS[confirmed_date >= 2020-02-25]
-merge_GermanyUS
-
 
 
 

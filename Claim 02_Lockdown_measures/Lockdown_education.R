@@ -13,17 +13,21 @@ policy <- fread("./extData/Policy.csv")
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time[, confirmed_date:= as.IDate(confirmed_date)]
-ggplot(time, aes(x=confirmed_date, y=daily_cases)) +
-  geom_line()
 
 
 #extract education measures from table policy
 date_education <- policy[type == "Education"]
 
 
-#plot start of education policies on infection cases per day within
-#the time frame 
+#plot start of education policies +
+#administration policies +
+#social policies
+#on infection cases per day within the time frame 
+
 ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  #education policies
+  
   geom_rect(aes(xmin=as.Date('2020-03-02'),xmax=as.Date('2020-04-06'),
                 ymin=740,ymax=743,color="School delay"))+
   geom_text(aes(x = as.Date('2020-03-02'), y = 760, label = "School delay"),
@@ -34,6 +38,8 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   geom_text(aes(x = as.Date('2020-04-09'), y = 760, label = "Online Classes"),
             size = 3, vjust = 0, hjust = 0, color = "red")+
   
+  #administation policies 
+  
   geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
                 ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
   geom_text(aes(x = as.Date('2020-02-29'), y = 860, label = "Strong Social distancing campaign"),
@@ -41,8 +47,10 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
                 ymin=840,ymax=843,color="Weak social\ndistancing campaign"))+
-  geom_text(aes(x = as.Date('2020-04-19'), y = 860, label = "Weak social distancing campaign"),
+  geom_text(aes(x = as.Date('2020-05-01'), y = 860, label = "Weak social distancing campaign"),
             size = 3, vjust = 0, hjust = 0, color = "purple")+
+  
+  #social policies
   
   geom_rect(aes(xmin=as.Date('2020-05-08'),xmax=as.Date('2020-06-07'),
                 ymin=110,ymax=113,color="Close bars\nand clubs"))+

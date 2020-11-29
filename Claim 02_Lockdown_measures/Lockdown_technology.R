@@ -62,6 +62,10 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   labs(x = "confirmed date", y = "")+
   theme(legend.position="bottom")
 
-#put 2 plots on one page
+
+
+#1. Run plot in file Lockdown_health
+#2. Run plot in Lockdown_technology
+#Execute code below to get both plots next to each other
 ggarrange(tech_plot, health_plot,
           ncol = 2, nrow = 1)
