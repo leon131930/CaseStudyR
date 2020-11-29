@@ -5,6 +5,7 @@ library(magrittr)
 library(data.table)
 library(ggplot2)
 library(maps)
+library(ggrepel)
 
 # importing Case
 case <- fread("./extData/Case.csv")
@@ -41,6 +42,7 @@ library("rnaturalearth")
 library("rnaturalearthdata")
 
 # Displaying world map with ggplot2
+world <- ne_countries(scale = "medium", returnclass = "sf")
 ggplot(data = world) +
   geom_sf() +
   xlab("Longitude") + ylab("Latitude") +
@@ -55,5 +57,21 @@ ggplot(data = world) +
 ggplot(data = world) +
   geom_sf() +
   coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE)
-# To be continued --> we still have to look up how we add the layer with our dots from above
+
+# Adding a layer with all the Covid Case Dots on top of the South Korea map
+ggplot(data = world) +
+  geom_sf() +
+  geom_point(data = case, aes(x=longitude, y=latitude)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE)
+# looks quite okay so far - now we need to make sure the colours are different and the size
+# varies according to the number of cases
+
+# Try to include aestetics as already in the plot above
+ggplot(data = world) +
+  geom_sf() +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  labs(title = "Confirmed Covid-cases mapped")
+
+
 
