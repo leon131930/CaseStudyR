@@ -1,7 +1,7 @@
 library(magrittr)
 library(data.table)
 library(ggplot2)
-
+library(ggpubr)
 
 # import files: Time, Policy
 time <- fread("./extData/Time.csv")
@@ -37,7 +37,8 @@ immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_li
                                           color = "Diagonostic tests"), 
              linetype = "longdash", show.legend = TRUE) +
   labs(x = "confirmed date", y = "daily cases") + 
-  theme(legend.position="bottom")
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
 
 #1. Run plot in file: Lockdown_overseas
 #2. Run plot in Lockdown_immigration (current file)

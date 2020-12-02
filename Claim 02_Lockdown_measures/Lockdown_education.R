@@ -62,4 +62,6 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
                 ymin=130,ymax=133,color="Close karaoke"))+
   
   labs(x = "confirmed date", y = "daily cases")+
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  theme(legend.title=element_blank()) 
+  

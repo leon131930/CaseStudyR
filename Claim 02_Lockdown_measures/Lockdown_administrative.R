@@ -23,4 +23,5 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) +
   geom_rect(aes(xmin=as.Date('2020-05-21'),xmax=as.Date('2020-06-03'),
                 ymin=130,ymax=133,color="Close karaoke"))+
   labs(x = "confirmed date", y = "daily cases")+
-  theme(legend.position="bottom")
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 

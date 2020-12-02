@@ -60,7 +60,8 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
   
   labs(x = "confirmed date", y = "")+
-  theme(legend.position="bottom")
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
 
 
 
