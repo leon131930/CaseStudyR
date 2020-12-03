@@ -8,6 +8,8 @@ library(ggpubr)
 
 # import files: Time, RKI data
 policy <- fread("./extData/Policy.csv") 
+
+
 nbPolicies <- policy[, .N, by=type] %>% setorder(., -N) 
 
 
@@ -21,11 +23,11 @@ plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
 
 #Policy Starting Day Distribution
 
-policy_by_day = policy[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
+policyDay = policy[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
 
-policy_by_day <- policy_by_day[, count := .N, by=start_date]
+policyDay <- policyDay[, count := .N, by=start_date]
 
-plot_polDistribution <- ggplot(policy_by_day, aes(x = start_date)) +
+plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
   geom_dotplot(dotsize = 2) +
   
   labs(x = "start date", y = "nb. of measures",
@@ -37,7 +39,7 @@ plot_polDistribution <- ggplot(policy_by_day, aes(x = start_date)) +
 
 #put plots together
 
-ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1) %>% 
-  ggarrange(.)
+ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
+
 
 

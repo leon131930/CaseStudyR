@@ -51,10 +51,10 @@ library(ggpubr)
 # import files: Time, RKI data
 time <- fread("./extData/Time.csv")
 policy <- fread("./extData/Policy.csv")
+policy1 <- fread("./extData/Policy.csv")
 RKI_data <- fread("./extData/DE_InfectionCases.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 ```
-
 
 
 
@@ -103,7 +103,42 @@ plot(plot_germany)
 * The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
 *Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
 
+```{r echo = FALSE}
 
+nbPolicies <- policy1[, .N, by=type] %>% setorder(., -N) 
+
+
+plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
+  geom_bar(stat="identity", width = 0.7) + 
+  coord_flip() +
+  labs(x = "type of policy", y = "nb. of measures",
+       title="Policies of the Government")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+
+
+#Policy Starting Day Distribution
+
+policyDay = policy1[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
+
+policyDay <- policyDay[, count := .N, by=start_date]
+
+plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
+  geom_dotplot(dotsize = 2) +
+  
+  labs(x = "start date", y = "nb. of measures",
+       title="Nb. of introduced measures")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5), 
+        axis.text.y = element_blank())
+
+
+
+#put plots together
+
+ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
+
+
+
+```
 
 
 
@@ -279,6 +314,5 @@ It works with almost all markdown flavours (the below blank line matters).
 
 
 ## Claim 3 - Region and Superspreaders
-
 
 
