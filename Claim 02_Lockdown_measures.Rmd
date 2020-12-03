@@ -1,0 +1,226 @@
+---
+title: 'Main Analsis'
+author: "Felix Heim, Jana Schneider, Jana, Leon"
+date: "December 5, 2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Claim 1 - Search Data Cases
+
+
+## Claim 2 - Strict lockdown measures have prevented a thorough spread in South Korea
+
+
+Claim description in more detail:
+
+* Stricter lockdown measures lead to a lower outbreak of the Covid-9 Virus 
+* Compared to Germany South Korea has done a great job
+
+
+Some introduction lines:
+
+* What was our initial motivation? / Core of our story
+* What is our approach? (1st, 2nd, 3rd, 4th graph)
+
+```{r echo=FALSE}
+#import libraries 
+
+library(magrittr)
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+```
+
+```{r echo=FALSE}
+# import files: Time, RKI data
+time <- fread("./extData/Time.csv")
+policy <- fread("./extData/Policy.csv")
+RKI_data <- fread("./extData/DE_InfectionCases.csv")
+patientinfo <- fread("./extData/PatientInfo.csv")
+```
+
+### Claim 2 - 1. Plot
+
+
+```{r echo=FALSE}
+#health_policies
+
+health_policy <- policy[type == "Health"]
+
+Kit <- health_policy[detail == "1st EUA"]
+Center <- health_policy[detail == "by Local Government"]
+Mask <- health_policy[detail == "Public-Sale"]
+Quarantine <- health_policy[gov_policy == "Extends Tightened Quarantine Measures"]
+
+#1. Run plot and safe it in health_plot
+#2. Go to file "Lockdown_technology" and run the code at the very end to get
+#the figure
+
+
+health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  geom_vline(data = Kit, aes(xintercept = start_date, 
+                             color = "Authorization of\nDiagnostic Kit"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = Center, aes(xintercept = start_date, 
+                                color = "Drive-Through\nScreening Center"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = Mask, aes(xintercept = start_date, 
+                              color = "Mask Distribution"), 
+             linetype = "longdash", show.legend = TRUE) +
+  geom_vline(data = Quarantine, aes(xintercept = start_date, 
+                                    color = "Extends Tightened\nQuarantine Measures"), 
+             linetype = "longdash", show.legend = TRUE) +
+  labs(x = "confirmed date", y = "daily cases") + theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+
+
+```
+
+```{r echo=FALSE}
+#Technology Policy
+
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+
+#extract education measures from table policy
+tech_start<- policy[type == "Technology"]
+
+tech_start <- tech_start[, c("policy_id", "country","type","end_date", "detail") := NULL]
+
+tech_start_cast <- dcast(tech_start, ... ~ gov_policy, value.var = "start_date")
+
+#plot start of education policies on infection cases per day within
+#the time frame 
+
+
+tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept = `Electronic Wristbands`,
+                 color = "Electronic\nWristbands"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept = `KI-Pass: Korea Internet - Pass`
+                 , color = "KI-Pas"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept =  `Open API`,
+                 color = "Open API"), 
+             linetype = "longdash", show.legend = TRUE) +
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept = `Open Data`, color = " Open Data"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept = `Self-Diagnosis App`, 
+                 color = "Self-Diagnosis\nApp"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = tech_start_cast, 
+             aes(xintercept = `Self-Quarantine Safety Protection App`,
+                 color = "Self-Quarantine\nSafety Protection App"), 
+             linetype = "longdash", show.legend = TRUE) +
+
+  
+  labs(x = "confirmed date", y = "")+
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+
+#1. Run plot in file Lockdown_health
+#2. Run plot in Lockdown_technology
+#Execute code below to get both plots next to each other
+plot_techAndHealth <- ggarrange(tech_plot, health_plot,
+          ncol = 2, nrow = 1)
+
+```
+
+
+```{r plot_techAndHealth, echo=FALSE}
+plot(plot_techAndHealth)
+```
+
+###### Short Anaylsis
+* 1st 
+* 2nd
+* 3rd
+
+### Claim 2 - 2. Plot
+
+```{r echo=FALSE}
+
+
+# Paste in file conent 
+
+
+```
+
+```{r echo=FALSE}
+
+
+# Paste in file conent 
+
+
+```
+
+```{r  echo=FALSE}
+
+
+# paste in final plot
+
+
+```
+
+###### Short Anaylsis
+* 1st 
+* 2nd
+* 3rd
+
+
+
+### Claim 2 - 3. Plot
+
+```{r echo=FALSE}
+
+
+# Paste in file conent 
+
+
+```
+
+```{r echo=FALSE}
+
+
+# Paste in file conent 
+
+
+```
+
+```{r echo=FALSE}
+
+
+# paste in final plot
+
+
+```
+
+###### Short Anaylsis
+* 1st 
+* 2nd
+* 3rd
+
+---
+**NOTE**
+
+It works with almost all markdown flavours (the below blank line matters).
+
+---
+
+
+## Claim 3 - Region and Superspreaders
+
+
+
