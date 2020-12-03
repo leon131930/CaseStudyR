@@ -41,4 +41,3 @@ ggplot(merge_GermanyUS, aes(x=confirmed_date)) +
                 ymin=6400,ymax=6430,color="61 days"))+
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
-
