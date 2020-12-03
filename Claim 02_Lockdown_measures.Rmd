@@ -40,6 +40,11 @@ library(magrittr)
 library(data.table)
 library(ggplot2)
 library(ggpubr)
+
+
+#hide warning messages
+#options(warn=-1)
+
 ```
 
 ```{r echo=FALSE}
@@ -51,7 +56,7 @@ patientinfo <- fread("./extData/PatientInfo.csv")
 ```
 
 
-### Claim 2 - 1. Plot
+
 
 ```{r echo=FALSE, message=FALSE, include=FALSE}
 #total cases in Korea per day
@@ -77,13 +82,13 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
   geom_line(aes(y=`daily_cases`,color="Germany"))+
   geom_line(aes(y=`Anzahl Covid-Fälle pro Tag`,color="South Korea")) + 
-  labs(x= "confirmed date", y="daily cases")+
+  labs(x= "confirmed date", y="daily cases",title="Daily cases: South Korea vs. Germany")+
   geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
                 ymin=860,ymax=890,color="18 days"))+
   geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
                 ymin=6400,ymax=6430,color="61 days"))+
   theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
 
 
 ```
@@ -100,7 +105,7 @@ plot(plot_germany)
 
 
 
-### Claim 2 - 3. Plot
+
 
 ```{r echo=FALSE}
 
@@ -185,7 +190,6 @@ annotate_figure(plot_immigration,
 * After experiencing a peak in numbers, the government of South Korea establisehd special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
  
 
-### Claim 2 - 4. Plot
 
 ```{r echo=FALSE}
 #total cases in Korea per day

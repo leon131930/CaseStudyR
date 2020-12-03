@@ -30,10 +30,10 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
   geom_line(aes(y=`daily_cases`,color="Germany"))+
   geom_line(aes(y=`Anzahl Covid-Fälle pro Tag`,color="South Korea")) + 
-  labs(x= "confirmed date", y="daily cases")+
+  labs(x= "confirmed date", y="daily cases",title="Daily cases: South Korea vs. Germany")+
   geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
                 ymin=860,ymax=890,color="18 days"))+
   geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
                 ymin=6400,ymax=6430,color="61 days"))+
   theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
