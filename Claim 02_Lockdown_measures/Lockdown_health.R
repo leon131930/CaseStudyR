@@ -17,13 +17,13 @@ health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() 
                              color = "Kit"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Center, aes(xintercept = start_date, 
-                                color = "Drive-Through\nCenter"), 
+                                color = "Drive-Thr.\nCenter"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Mask, aes(xintercept = start_date, 
                                 color = "Mask\nDistr."), 
              linetype = "longdash", show.legend = TRUE) +
   geom_vline(data = Quarantine, aes(xintercept = start_date, 
-                                    color = "Ext. Quar."), 
+                                    color = "Ext.\nQuar."), 
              linetype = "longdash", show.legend = TRUE) +
   labs(x = "confirmed date", y = "",title="Health measures") + theme(legend.position="bottom") +
   theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 

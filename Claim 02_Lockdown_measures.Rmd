@@ -15,17 +15,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Claim 2 - Strict lockdown measures have prevented a thorough spread in South Korea
 
+**Our initial motivation:**
 
-Claim description in more detail:
-
-* Stricter lockdown measures lead to a lower outbreak of the Covid-9 Virus 
-* Compared to Germany South Korea has done a great job
+* After a massive increase in daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
 
 
-Some introduction lines:
+**Claim description in more detail:**
 
-* What was our initial motivation? / Core of our story
-* What is our approach? (1st, 2nd, 3rd, 4th graph)
+* Stricter lockdown measures lead to a lower outbreak of the Covid-19 Virus 
+* Compared to other countries, for example Germany, the government of South Korea reacted more effectively and efficiently 
+
+
+**Our approach:**
+
+* We first compared the daily cases of South Korea with the ones of Germany.
+* Next we looked at the different types of government policy' measures.
+* Within each type of policy we analysed the different measures in terms of time to daily cases.
+
 
 ```{r echo=FALSE}
 #import libraries 
@@ -88,10 +94,9 @@ plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) +
 plot(plot_germany)
 ```
 
-###### Short Anaylsis
-* 1st 
-* 2nd
-* 3rd
+###### Short Analysis
+* The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
+*Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
 
 
 
@@ -175,10 +180,10 @@ annotate_figure(plot_immigration,
 
 ```
 
-###### Short Anaylsis
-* 1st 
-* 2nd
-* 3rd
+###### Short Analysis
+* After the number of daily cases related to overseas inflow reached a very high level, the government of South Korea imposed a mandatory 14-day Self-Quarantine. It seems that after a short time the number of daily cases related to overseas inflow could be reduced sharply and retained a relatively stable level.
+* After experiencing a peak in numbers, the government of South Korea establisehd special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
+ 
 
 ### Claim 2 - 4. Plot
 
@@ -235,7 +240,7 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   geom_rect(aes(xmin=as.Date('2020-05-16'),xmax=as.Date('2020-06-30'),
                 ymin=170,ymax=173,color="Local government\nadministrative orders"))+
   geom_text(aes(x = as.Date('2020-05-16'), 
-                y = 180, label = "Local government administrative orders"),
+                y = 180, label = "Local gov. administrative orders"),
             size = 3, vjust = 0, hjust = 0, color = "black")+
   geom_rect(aes(xmin=as.Date('2020-05-21'),xmax=as.Date('2020-06-03'),
                 ymin=230,ymax=233,color="Close karaoke"))+
@@ -249,104 +254,16 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 ```
 
-### Claim 2 - 5. Plot
+###### Short Analysis
+* After the number of daily cases have reached peak in March, numerous meausures with the aim of social distancing, such as delaying school start, were introduced. It seems that through these measures the number of daily cases could be reduced.
+* In the begining of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
 
 
 
 
 
-```{r echo=FALSE}
-#health_policies
-
-health_policy <- policy[type == "Health"]
-
-Kit <- health_policy[detail == "1st EUA"]
-Center <- health_policy[detail == "by Local Government"]
-Mask <- health_policy[detail == "Public-Sale"]
-Quarantine <- health_policy[gov_policy == "Extends Tightened Quarantine Measures"]
-
-#1. Run plot and safe it in health_plot
-#2. Go to file "Lockdown_technology" and run the code at the very end to get
-#the figure
 
 
-health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
-  geom_vline(data = Kit, aes(xintercept = start_date, 
-                             color = "Kit"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = Center, aes(xintercept = start_date, 
-                                color = "Drive-Thr.\nCenter"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = Mask, aes(xintercept = start_date, 
-                                color = "Mask\nDistr."), 
-             linetype = "longdash", show.legend = TRUE) +
-  geom_vline(data = Quarantine, aes(xintercept = start_date, 
-                                    color = "Ext.\nQuar."), 
-             linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "",title="Health measures") + theme(legend.position="bottom") +
-  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
-
-```
-
-```{r echo=FALSE}
-#total cases in Korea per day
-time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-time[, confirmed_date:= as.IDate(confirmed_date)]
-
-
-
-#extract education measures from table policy
-tech_start<- policy[type == "Technology"]
-tech_start <- tech_start[, c("policy_id", "country","type","end_date", "detail") := NULL]
-
-tech_start_cast <- dcast(tech_start, ... ~ gov_policy, value.var = "start_date")
-
-#plot start of education policies on infection cases per day within
-#the time frame 
-
-
-tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
-  
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Electronic Wristbands`,
-                 color = "Electronic\nWristbands"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `KI-Pass: Korea Internet - Pass`
-                 , color = "KI-Pass"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Self-Quarantine Safety Protection App`,
-                 color = "Self-Quar.\nApp"), 
-             linetype = "longdash", show.legend = TRUE) +
-
-  
-  labs(x = "confirmed date", y = "daily cases", 
-       title = "Technology measures") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(x = "confirmed date", y = "daily cases")+
-  theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
-```
-
-
-```{r plot_techAndHealth, echo=FALSE}
-
-#1. Run plot in file Lockdown_health
-#2. Run plot in Lockdown_technology
-#Execute code below to get both plots next to each other
- ggarrange(tech_plot, health_plot,
-          ncol = 2, nrow = 1) 
-
-
-
-
-```
-
-###### Short Anaylsis
-* 1st 
-* 2nd
-* 3rd
 
 
 ---
