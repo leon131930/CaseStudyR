@@ -39,5 +39,6 @@ ggplot(merge_GermanyUS, aes(x=confirmed_date)) +
                 ymin=860,ymax=890,color="18 days"))+
   geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
                 ymin=6400,ymax=6430,color="61 days"))+
+  theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
 
