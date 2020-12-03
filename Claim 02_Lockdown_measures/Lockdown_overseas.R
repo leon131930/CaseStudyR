@@ -39,6 +39,7 @@ overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_lin
                                     color = "Diagnostic Test\nUS"), 
              linetype = "longdash", show.legend = TRUE) +
   labs(x = "confirmed date", y = "nb. infection cases (immigration)") +
+  labs(x = "confirmed date", y = "daily cases (immigration)") +
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
 
