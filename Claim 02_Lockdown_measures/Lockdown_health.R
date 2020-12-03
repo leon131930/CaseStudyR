@@ -25,7 +25,6 @@ health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() 
   geom_vline(data = Quarantine, aes(xintercept = start_date, 
                                     color = "Extends Tightened\nQuarantine Measures"), 
              linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "daily cases") + theme(legend.position="bottom") +
   labs(x = "confirmed date", y = "") + theme(legend.position="bottom", 
                                              titel ="Health measures") +
   theme(plot.title = element_text(hjust=0.5)) +

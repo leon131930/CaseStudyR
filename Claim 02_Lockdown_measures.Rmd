@@ -1,5 +1,5 @@
 ---
-title: 'Main Analsis'
+title: 'Main Analysis'
 author: "Felix Heim, Jana Schneider, Jana, Leon"
 date: "December 5, 2020"
 output: html_document
