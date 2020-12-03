@@ -30,38 +30,46 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   geom_rect(aes(xmin=as.Date('2020-03-02'),xmax=as.Date('2020-04-06'),
                 ymin=740,ymax=743,color="School delay"))+
-  geom_text(aes(x = as.Date('2020-03-02'), y = 760, label = "School delay"),
-    size = 3, vjust = 0, hjust = 0, color = "forestgreen")+
+  geom_text(aes(x = as.Date('2020-03-02'), y = 750, label = "School delay"),
+    size = 3, vjust = 0, hjust = 0, color = "black")+
   
   geom_rect(aes(xmin=as.Date('2020-04-09'),xmax=as.Date('2020-06-08'),
-                ymin=740,ymax=743,color="Online Classes"))+  
-  geom_text(aes(x = as.Date('2020-04-09'), y = 760, label = "Online Classes"),
-            size = 3, vjust = 0, hjust = 0, color = "red")+
+                ymin=740,ymax=743,color="Online classes"))+  
+  geom_text(aes(x = as.Date('2020-04-09'), y = 750, label = "Online Classes"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   
   #social policies 
   
   geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
                 ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
   geom_text(aes(x = as.Date('2020-02-29'), 
-                y = 860, label = "Strong Social distancing campaign"),
-            size = 3, vjust = 0, hjust = 0, color = "blue")+
+                y = 850, label = "Strong Social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   
   geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
                 ymin=840,ymax=843,color="Weak social\ndistancing campaign"))+
   geom_text(aes(x = as.Date('2020-05-01'), 
-                y = 860, label = "Weak social distancing campaign"),
-            size = 3, vjust = 0, hjust = 0, color = "purple")+
+                y = 850, label = "Weak social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   
   #administrative policies
   
   geom_rect(aes(xmin=as.Date('2020-05-08'),xmax=as.Date('2020-06-07'),
                 ymin=110,ymax=113,color="Close bars\nand clubs"))+
+  geom_text(aes(x = as.Date('2020-05-08'), 
+                y = 120, label = "Close bars and clubs"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   geom_rect(aes(xmin=as.Date('2020-05-16'),xmax=as.Date('2020-06-30'),
-                ymin=120,ymax=123,color="Local government\nadministrative orders"))+
+                ymin=170,ymax=173,color="Local government\nadministrative orders"))+
+  geom_text(aes(x = as.Date('2020-05-16'), 
+                y = 180, label = "Local government administrative orders"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   geom_rect(aes(xmin=as.Date('2020-05-21'),xmax=as.Date('2020-06-03'),
-                ymin=130,ymax=133,color="Close karaoke"))+
+                ymin=230,ymax=233,color="Close karaoke"))+
+  geom_text(aes(x = as.Date('2020-05-21'), 
+                y = 240, label = "Close karaoke"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
   
   labs(x = "confirmed date", y = "daily cases")+
-  theme(legend.position="bottom")+
-  theme(legend.title=element_blank()) 
+  theme(legend.position="none")
   
