@@ -59,13 +59,10 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
              linetype = "longdash", show.legend = TRUE) +
 
   
-<<<<<<< HEAD
   labs(x = "confirmed date", y = "daily cases", 
        title = "Technology measures") +
   theme(plot.title = element_text(hjust=0.5)) +
-=======
   labs(x = "confirmed date", y = "daily cases")+
->>>>>>> 685b70482c589bc52afa8fb55e37ddedf0ecc0cd
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
 
@@ -74,13 +71,13 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 #1. Run plot in file Lockdown_health
 #2. Run plot in Lockdown_technology
 #Execute code below to get both plots next to each other
-<<<<<<< HEAD
+
 plot_techAndHealth <- ggarrange(tech_plot, health_plot,
           ncol = 2, nrow = 1) 
 
 annotate_figure(plot_techAndHealth,
                 top = text_grob("Test", color = "red", face = "bold", size = 14))
 
-=======
+
 ggarrange(tech_plot, health_plot)
->>>>>>> 685b70482c589bc52afa8fb55e37ddedf0ecc0cd
+

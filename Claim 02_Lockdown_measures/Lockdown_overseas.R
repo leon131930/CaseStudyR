@@ -38,7 +38,6 @@ overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_lin
   geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
                                     color = "Diagnostic Test\nUS"), 
              linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "nb. infection cases (immigration)") +
   labs(x = "confirmed date", y = "daily cases (immigration)") +
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
