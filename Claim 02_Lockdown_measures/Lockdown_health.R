@@ -20,7 +20,7 @@ health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() 
                                 color = "Drive-Through\nScreening Center"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Mask, aes(xintercept = start_date, 
-                              color = "Mask Distribution"), 
+                              color = "Mask\nDistribution"), 
              linetype = "longdash", show.legend = TRUE) +
   geom_vline(data = Quarantine, aes(xintercept = start_date, 
                                     color = "Extends Tightened\nQuarantine Measures"), 
