@@ -21,13 +21,13 @@ IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diag
 immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   geom_vline(data = IP_Special, aes(xintercept = start_date, 
-                               color = "Immigration\nprocedure"), 
+                                    color = "Immigration\nprocedure"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = IP_14Day, aes(xintercept = start_date, 
-                                       color = "Self quarantine"), 
+                                  color = "Self\nquarantine"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
-                                 color = "Diagnostic Test\nUS"), 
+                                    color = "Diagnostic\nTest US"), 
              linetype = "longdash", show.legend = TRUE)  +
   labs(x = "confirmed date", y = "daily cases") + 
   theme(legend.position="bottom") +
@@ -36,6 +36,9 @@ immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_li
 #1. Run plot in file: Lockdown_overseas
 #2. Run plot in Lockdown_immigration (current file)
 #Execute code below to get both plots next to each other
-ggarrange(immigration_plot, overseas_plot,
+plot_immigration <- ggarrange(immigration_plot, overseas_plot,
           ncol = 2, nrow = 1)
+annotate_figure(plot_immigration,
+                top = text_grob("International measures", 
+                                color = "black", size = 14))
   

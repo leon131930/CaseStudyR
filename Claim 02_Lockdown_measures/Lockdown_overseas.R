@@ -12,7 +12,6 @@ time <- fread("./extData/Time.csv")
 #total number of infection cases due to immigration
 contact_overseas <- patientinfo[infection_case == "overseas inflow", 
                                  .N, by = "confirmed_date"]
-contact_overseas[1:10]
 
 #get subsets only for 3 different immigration policies 
 #IP_Special, IP_14Day, IP_ManTest
@@ -33,12 +32,12 @@ overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_lin
                                     color = "Immigration\nprocedure"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = IP_14Day, aes(xintercept = start_date, 
-                                  color = "Self quarantine"), 
+                                  color = "Self\nquarantine"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
-                                    color = "Diagnostic Test\nUS"), 
+                                    color = "Diagnostic\nTest US"), 
              linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "daily cases (immigration)") +
+  labs(x = "confirmed date", y = "daily cases (overseas inflows)") +
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
 

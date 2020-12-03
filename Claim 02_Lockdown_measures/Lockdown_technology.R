@@ -22,11 +22,9 @@ time[, confirmed_date:= as.IDate(confirmed_date)]
 
 #extract education measures from table policy
 tech_start<- policy[type == "Technology"]
-head(tech_start)
 tech_start <- tech_start[, c("policy_id", "country","type","end_date", "detail") := NULL]
 
 tech_start_cast <- dcast(tech_start, ... ~ gov_policy, value.var = "start_date")
-tech_start_cast
 
 #plot start of education policies on infection cases per day within
 #the time frame 
@@ -40,22 +38,11 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = tech_start_cast, 
              aes(xintercept = `KI-Pass: Korea Internet - Pass`
-                 , color = "KI-Pas"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept =  `Open API`,
-                 color = "Open API"), 
-             linetype = "longdash", show.legend = TRUE) +
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Open Data`, color = " Open Data"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Self-Diagnosis App`, 
-                 color = "Self-Diagnosis\nApp"), 
+                 , color = "KI-Pass"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = tech_start_cast, 
              aes(xintercept = `Self-Quarantine Safety Protection App`,
-                 color = "Self-Quarantine\nSafety Protection App"), 
+                 color = "Self-Quar.\nApp"), 
              linetype = "longdash", show.legend = TRUE) +
 
   
@@ -74,9 +61,6 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 plot_techAndHealth <- ggarrange(tech_plot, health_plot,
           ncol = 2, nrow = 1) 
-
-annotate_figure(plot_techAndHealth,
-                top = text_grob("Test", color = "red", face = "bold", size = 14))
 
 
 ggarrange(tech_plot, health_plot)

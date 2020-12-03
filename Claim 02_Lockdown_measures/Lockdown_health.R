@@ -14,16 +14,16 @@ Quarantine <- health_policy[gov_policy == "Extends Tightened Quarantine Measures
 
 health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   geom_vline(data = Kit, aes(xintercept = start_date, 
-                             color = "Authorization of\nDiagnostic Kit"), 
+                             color = "Kit"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Center, aes(xintercept = start_date, 
-                                color = "Drive-Through\nScreening Center"), 
+                                color = "Drive-Through\nCenter"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Mask, aes(xintercept = start_date, 
-                                color = "Mask\nDistribution"), 
+                                color = "Mask\nDistr."), 
              linetype = "longdash", show.legend = TRUE) +
   geom_vline(data = Quarantine, aes(xintercept = start_date, 
-                                    color = "Extends Tightened\nQuarantine Measures"), 
+                                    color = "Ext. Quar."), 
              linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "") + theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
+  labs(x = "confirmed date", y = "",title="Health measures") + theme(legend.position="bottom") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 

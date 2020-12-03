@@ -35,10 +35,10 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   geom_rect(aes(xmin=as.Date('2020-04-09'),xmax=as.Date('2020-06-08'),
                 ymin=740,ymax=743,color="Online classes"))+  
-  geom_text(aes(x = as.Date('2020-04-09'), y = 750, label = "Online Classes"),
+  geom_text(aes(x = as.Date('2020-04-09'), y = 750, label = "Online classes"),
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
-  #administation policies 
+  #social policies 
   
   geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
                 ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
@@ -70,6 +70,7 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
                 y = 240, label = "Close karaoke"),
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
-  labs(x = "confirmed date", y = "daily cases")+
-  theme(legend.position="none")
+  labs(x = "confirmed date", y = "daily cases",
+       title="Administrative / Education / Social Measures")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
   

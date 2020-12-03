@@ -44,7 +44,215 @@ RKI_data <- fread("./extData/DE_InfectionCases.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 ```
 
+
 ### Claim 2 - 1. Plot
+
+```{r echo=FALSE, message=FALSE, include=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+
+# total cases Germany
+RKI_data <- RKI_data[, "Anzahl COVID-19-Fälle kumuliert" := NULL]
+
+RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(Berichtsdatum, 
+                                                          format ="%d.%m.%y")]
+#change date class to "IDate"
+RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
+RKI_data_UsFormat <- RKI_data_UsFormat[, Berichtsdatum := NULL]
+
+
+
+merge_GermanyUS <- merge(RKI_data_UsFormat, time, 
+                         by = "confirmed_date", all.y = TRUE)
+
+
+# plot
+plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
+  geom_line(aes(y=`daily_cases`,color="Germany"))+
+  geom_line(aes(y=`Anzahl Covid-Fälle pro Tag`,color="South Korea")) + 
+  labs(x= "confirmed date", y="daily cases")+
+  geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
+                ymin=860,ymax=890,color="18 days"))+
+  geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
+                ymin=6400,ymax=6430,color="61 days"))+
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+
+
+```
+
+
+
+```{r  echo=FALSE}
+plot(plot_germany)
+```
+
+###### Short Anaylsis
+* 1st 
+* 2nd
+* 3rd
+
+
+
+### Claim 2 - 3. Plot
+
+```{r echo=FALSE}
+
+#total number of infection cases due to immigration
+contact_overseas <- patientinfo[infection_case == "overseas inflow", 
+                                 .N, by = "confirmed_date"]
+
+#get subsets only for 3 different immigration policies 
+#IP_Special, IP_14Day, IP_ManTest
+immigration_policy <- policy[type == "Immigration"]
+
+IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
+IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
+IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
+
+
+#1. Run plot and safe it in overseas_plot
+#2. Go to file "Lockdown_immigration" and run the code at the very end to get
+#the figure
+
+
+overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
+  geom_vline(data = IP_Special, aes(xintercept = start_date, 
+                                    color = "Immigration\nprocedure"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
+                                  color = "Self\nquarantine"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
+                                    color = "Diagnostic\nTest US"), 
+             linetype = "longdash", show.legend = TRUE) +
+  labs(x = "confirmed date", y = "daily cases (overseas inflows)") +
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+
+
+
+```
+
+```{r echo=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+
+
+
+immigration_policy <- policy[type == "Immigration"]
+
+IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
+IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
+IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
+
+immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  geom_vline(data = IP_Special, aes(xintercept = start_date, 
+                               color = "Immigration\nprocedure"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
+                                       color = "Self\nquarantine"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
+                                 color = "Diagnostic\nTest US"), 
+             linetype = "longdash", show.legend = TRUE)  +
+  labs(x = "confirmed date", y = "daily cases") + 
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+```
+
+```{r echo=FALSE}
+#1. Run plot in file: Lockdown_overseas
+#2. Run plot in Lockdown_immigration (current file)
+#Execute code below to get both plots next to each other
+plot_immigration <- ggarrange(immigration_plot, overseas_plot,
+          ncol = 2, nrow = 1)
+annotate_figure(plot_immigration,
+                top = text_grob("International measures", 
+                                color = "black", size = 14))
+
+```
+
+###### Short Anaylsis
+* 1st 
+* 2nd
+* 3rd
+
+### Claim 2 - 4. Plot
+
+```{r echo=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+
+
+#extract education measures from table policy
+date_education <- policy[type == "Education"]
+
+
+#plot start of education policies +
+#administration policies +
+#social policies
+#on infection cases per day within the time frame 
+
+ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  #education policies
+  
+  geom_rect(aes(xmin=as.Date('2020-03-02'),xmax=as.Date('2020-04-06'),
+                ymin=740,ymax=743,color="School delay"))+
+  geom_text(aes(x = as.Date('2020-03-02'), y = 750, label = "School delay"),
+    size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  geom_rect(aes(xmin=as.Date('2020-04-09'),xmax=as.Date('2020-06-08'),
+                ymin=740,ymax=743,color="Online classes"))+  
+  geom_text(aes(x = as.Date('2020-04-09'), y = 750, label = "Online classes"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  #social policies 
+  
+  geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
+                ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
+  geom_text(aes(x = as.Date('2020-02-29'), 
+                y = 850, label = "Strong Social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
+                ymin=840,ymax=843,color="Weak social\ndistancing campaign"))+
+  geom_text(aes(x = as.Date('2020-05-01'), 
+                y = 850, label = "Weak social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  #administrative policies
+  
+  geom_rect(aes(xmin=as.Date('2020-05-08'),xmax=as.Date('2020-06-07'),
+                ymin=110,ymax=113,color="Close bars\nand clubs"))+
+  geom_text(aes(x = as.Date('2020-05-08'), 
+                y = 120, label = "Close bars and clubs"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  geom_rect(aes(xmin=as.Date('2020-05-16'),xmax=as.Date('2020-06-30'),
+                ymin=170,ymax=173,color="Local government\nadministrative orders"))+
+  geom_text(aes(x = as.Date('2020-05-16'), 
+                y = 180, label = "Local government administrative orders"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  geom_rect(aes(xmin=as.Date('2020-05-21'),xmax=as.Date('2020-06-03'),
+                ymin=230,ymax=233,color="Close karaoke"))+
+  geom_text(aes(x = as.Date('2020-05-21'), 
+                y = 240, label = "Close karaoke"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  labs(x = "confirmed date", y = "daily cases",
+       title="Administrative / Education / Social Measures")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+
+```
+
+### Claim 2 - 5. Plot
+
+
+
 
 
 ```{r echo=FALSE}
@@ -64,33 +272,31 @@ Quarantine <- health_policy[gov_policy == "Extends Tightened Quarantine Measures
 
 health_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   geom_vline(data = Kit, aes(xintercept = start_date, 
-                             color = "Authorization of\nDiagnostic Kit"), 
+                             color = "Kit"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Center, aes(xintercept = start_date, 
-                                color = "Drive-Through\nScreening Center"), 
+                                color = "Drive-Thr.\nCenter"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = Mask, aes(xintercept = start_date, 
-                              color = "Mask Distribution"), 
+                                color = "Mask\nDistr."), 
              linetype = "longdash", show.legend = TRUE) +
   geom_vline(data = Quarantine, aes(xintercept = start_date, 
-                                    color = "Extends Tightened\nQuarantine Measures"), 
+                                    color = "Ext.\nQuar."), 
              linetype = "longdash", show.legend = TRUE) +
-  labs(x = "confirmed date", y = "daily cases") + theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
-
+  labs(x = "confirmed date", y = "",title="Health measures") + theme(legend.position="bottom") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
 
 ```
 
 ```{r echo=FALSE}
-#Technology Policy
-
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time[, confirmed_date:= as.IDate(confirmed_date)]
 
+
+
 #extract education measures from table policy
 tech_start<- policy[type == "Technology"]
-
 tech_start <- tech_start[, c("policy_id", "country","type","end_date", "detail") := NULL]
 
 tech_start_cast <- dcast(tech_start, ... ~ gov_policy, value.var = "start_date")
@@ -107,69 +313,32 @@ tech_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = tech_start_cast, 
              aes(xintercept = `KI-Pass: Korea Internet - Pass`
-                 , color = "KI-Pas"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept =  `Open API`,
-                 color = "Open API"), 
-             linetype = "longdash", show.legend = TRUE) +
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Open Data`, color = " Open Data"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = tech_start_cast, 
-             aes(xintercept = `Self-Diagnosis App`, 
-                 color = "Self-Diagnosis\nApp"), 
+                 , color = "KI-Pass"), 
              linetype = "longdash", show.legend = TRUE)+
   geom_vline(data = tech_start_cast, 
              aes(xintercept = `Self-Quarantine Safety Protection App`,
-                 color = "Self-Quarantine\nSafety Protection App"), 
+                 color = "Self-Quar.\nApp"), 
              linetype = "longdash", show.legend = TRUE) +
 
   
-  labs(x = "confirmed date", y = "")+
+  labs(x = "confirmed date", y = "daily cases", 
+       title = "Technology measures") +
+  theme(plot.title = element_text(hjust=0.5)) +
+  labs(x = "confirmed date", y = "daily cases")+
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
-
-#1. Run plot in file Lockdown_health
-#2. Run plot in Lockdown_technology
-#Execute code below to get both plots next to each other
-plot_techAndHealth <- ggarrange(tech_plot, health_plot,
-          ncol = 2, nrow = 1)
-
 ```
 
 
 ```{r plot_techAndHealth, echo=FALSE}
-plot(plot_techAndHealth)
-```
 
-###### Short Anaylsis
-* 1st 
-* 2nd
-* 3rd
-
-### Claim 2 - 2. Plot
-
-```{r echo=FALSE}
+#1. Run plot in file Lockdown_health
+#2. Run plot in Lockdown_technology
+#Execute code below to get both plots next to each other
+ ggarrange(tech_plot, health_plot,
+          ncol = 2, nrow = 1) 
 
 
-# Paste in file conent 
-
-
-```
-
-```{r echo=FALSE}
-
-
-# Paste in file conent 
-
-
-```
-
-```{r  echo=FALSE}
-
-
-# paste in final plot
 
 
 ```
@@ -179,38 +348,6 @@ plot(plot_techAndHealth)
 * 2nd
 * 3rd
 
-
-
-### Claim 2 - 3. Plot
-
-```{r echo=FALSE}
-
-
-# Paste in file conent 
-
-
-```
-
-```{r echo=FALSE}
-
-
-# Paste in file conent 
-
-
-```
-
-```{r echo=FALSE}
-
-
-# paste in final plot
-
-
-```
-
-###### Short Anaylsis
-* 1st 
-* 2nd
-* 3rd
 
 ---
 **NOTE**
