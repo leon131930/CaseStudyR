@@ -37,7 +37,7 @@ library(tidyr)
 library(dplyr)
 library(maps)
 library(ggrepel)
-library(ggplot2)
+library(rgeos)
 library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -48,19 +48,11 @@ library(rnaturalearthdata)
 case <- fread("./extData/Case.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 region <- fread("./extData/Region.csv")
+time <- fread("./extData/Time.csv")
 ```
 
 #### First part of the analyis
-**Who was infected by with infection case? What role do the superspreader events play?**
-
-```{r}
-# First part of analysis, who was infected through was "infection cause"?
-patientinfo %>% count(infection_case) %>% top_n(15, n) %>% arrange(desc(n))
-```
-##### Short interim analysis:
-* Seems like despite contact with a patient and oversees inflow, the main reasons for getting Covid-19 were related to some main events that happened throughout the country
-* The most cases are related to the Itaewon clubs. The church that we read about in the news is on 4th place when we don't count contact with patient, overseas inflow etc.
-
+**Who was infected by with infection case? What role do the super spreader events play?**
 
 ```{r}
 # Plotting the main 10 infection cases
@@ -71,12 +63,36 @@ ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) +
   theme(axis.text.x=element_text(angle=45,hjust=1)) +
   labs(x="Infection Reason", y="Number of Cases", title = "Top 10 Infection Reasons")
 ```
+##### Short interim analysis:
+* Seems like apart from contact with a patient and oversees inflow, the main reasons for getting Covid-19 were related to some main events that happened throughout the country
+* The most cases are related to the Itaewon clubs. The church that we read about in the news is on 4th place when we don't count contact with patient, overseas inflow etc.
 
+------
+Following, we'll create a graph comparing the total daily cases with the daily cases related to the super spreader events. Since the "patientinfo" table represents only a sample of the total amount of cases, we will first show, that patientinfo can indeedn be seen as a representative sample of the total amount of cases.
 
 ```{r}
-# Creating a graph comparing the daily cases with the cases related to the spreader events
-## IMPORTANT: Not the real "total number" of cases as we are using the patientinfo data table. Real number of daily cases goes up to 800 per day. However, patientinfo can be seen as a valid sample, mirroring the graph structure of all cases in total (see claim 2)
+# Graph showing total daily cases over time, patientinfo database
+## doesn't matter Leon already defined this 
+patientinfo[, daily_cases := .N, by = confirmed_date]
+total_cases_patientinfo <- ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") + labs(x="Time", y="Cases per Day")
 
+# Graph showing total daily cases over time, time database
+## doesn't matter for final markdown, only so this will work here
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line()
+
+# Putting both graphs next to each other to show patientinfo is a sample of time
+library(ggpubr)
+ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
+```
+
+
+As one can see both graph lines follow a similar pattern over the same time period. Therefore, we will assume that we can treat patientinfo as a representative sample. 
+
+```{r}
 # Calculating the daily cases and adding this as another column
 patientinfo[, daily_cases := .N, by = confirmed_date]
 
