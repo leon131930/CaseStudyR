@@ -1,6 +1,6 @@
 ---
 title: "Claim_01_Markdown"
-author: "Group 86"
+author: "Group 86 - Jana Schneider, Jana Jeggle, Felix Heim, Leon Gaertner"
 date: "4 12 2020"
 output: html_document
 ---
