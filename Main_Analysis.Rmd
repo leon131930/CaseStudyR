@@ -186,8 +186,9 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
 
 **Short analysis**
 
-* 1st
-* 2st
+* The number of immigration and education policies dominate the other measures. This is related to the fact that immigration measures are counted for each countery and education measures for each school type
+
+* Shortly after the number of infection cases surged the government of South Korea reacted with numerous measures in all kind of area. The many measures in the middle of April are related to the Online-school opening measures that all took place at once for each type of school. 
 
 
 ```{r echo=FALSE, message=FALSE}
