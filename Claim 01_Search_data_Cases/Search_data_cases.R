@@ -29,24 +29,23 @@ search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
 
 
 #flu & cold search term comparison
-ggplot(search_patient[date >= "2019-10-01" & date < "2020-05-01"], aes(x=date)) +
-  geom_line(aes(y=daily_cases, col = "daily_cases")) +
-  geom_line(aes(y=flu*30, col = "flu")) +
-  geom_line(aes(y=cold*30, col = "cold"))+
-  labs(title="Daily covid cases & search data")+
-  scale_y_continuous(
-    # Features of the first axis
-    name = "daily confirmed cases",
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(trans=~./30*10000, name="Search Volume")
-  )
+# ggplot(search_patient[date >= "2019-10-01" & date < "2020-05-01"], aes(x=date)) +
+#   geom_line(aes(y=daily_cases, col = "daily_cases")) +
+#   geom_line(aes(y=flu*30, col = "flu")) +
+#   geom_line(aes(y=cold*30, col = "cold"))+
+#   labs(title="Daily covid cases & search data")+
+#   scale_y_continuous(
+#     # Features of the first axis
+#     name = "daily confirmed cases",
+#     # Add a second axis and specify its features
+#     sec.axis = sec_axis(trans=~./30*10000, name="Search Volume")
+#   )
 
-
-# coronavirus search volume & daily cases
-#setting colour
+#set colour for visualization
 searchcolour <- "#00c7c6"
 dailycasecolour <- "#ff0000"
 
+# coronavirus search volume & daily cases
 ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
@@ -65,10 +64,6 @@ ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) 
 
   
 # flu search volume & daily cases
-#setting colour
-searchcolour <- "#00c7c6"
-dailycasecolour <- "#ff0000"
-
 ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) +
   scale_x_date(date_breaks = "6 month", date_labels = "%b %y")+
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
