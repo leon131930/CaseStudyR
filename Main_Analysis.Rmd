@@ -113,7 +113,7 @@ time[, confirmed_date:= as.IDate(confirmed_date)]
 
 # total cases Germany
 
-RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date("Berichtsdatum", 
+RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date(`Berichtsdatum`, 
                                                           format ="%d.%m.%y")]
 #change date class to "IDate"
 RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
