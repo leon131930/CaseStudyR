@@ -21,6 +21,26 @@ case <- fread("./extData/Case.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 time <- fread("./extData/Time.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
+
+#create column for # of daily cases, based on count of confirmed_date
+patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
+
+
+#rename confirmed_date to date (otherwise not able to join)
+patientinfo[, date := sub("confirmed_date", "date", confirmed_date)]
+#change date class to "IDate"
+patientinfo[, date:= as.IDate(date)]
+
+#full outer join of patientinfo and searchtrend
+search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
+
+#subset search_patient to Jan-April 2020
+search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01"]
+
+# plot final with two graphs:
+ggplot(search_patientsubset, aes(x=date)) +
+  geom_line(aes(y=daily_cases, colour = "daily_cases")) +
+  geom_line(aes(y=coronavirus, colour = "coronavirus"))
 ```
 
 
