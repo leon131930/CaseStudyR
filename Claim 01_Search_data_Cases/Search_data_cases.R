@@ -95,7 +95,7 @@ ggplot(search_patientsubset[date >= "2020-02-15" & date < "2020-04-01"], aes(x=d
         axis.title.y.right = element_text(angle=90))
   
 # flu search volume vs daily cases
-searchcolour <- "#3be8ff"
+searchcolour <- "#00c7c6"
 dailycasecolour <- "#ff0000"
 ggplot(search_patient[date >= "2019-08-01" & date < "2020-05-01"], aes(x=date)) +
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
