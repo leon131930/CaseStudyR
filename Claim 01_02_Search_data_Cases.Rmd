@@ -1,0 +1,18 @@
+---
+title: "Claim_01_Markdown"
+author: "Group 86"
+date: "4 12 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
