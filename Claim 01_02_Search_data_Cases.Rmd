@@ -10,6 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Claim 1 - Search Data Cases
+```{r}
+library(magrittr)
+library(data.table)
+library(ggplot2)
+
+
+# importing Case, PatientInfo, Time, Searchtrend
+case <- fread("./extData/Case.csv")
+patientinfo <- fread("./extData/PatientInfo.csv")
+time <- fread("./extData/Time.csv")
+searchtrend <- fread("./extData/SearchTrend.csv")
+```
 
 
 ## Claim 2 - Strict lockdown measures have prevented a thorough spread in South Korea
