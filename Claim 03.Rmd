@@ -70,7 +70,7 @@ ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=45,hjust=1)) +
   labs(x="Infection Reason", y="Number of Cases", title = "Top 10 Infection Reasons")
--```
+```
 
 
 ```{r}
