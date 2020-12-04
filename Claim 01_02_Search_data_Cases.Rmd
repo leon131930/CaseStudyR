@@ -8,29 +8,60 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r echo = TRUE, message=FALSE}
+# Load the libraries we need
+library(magrittr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(maps)
+library(ggrepel)
+library(rgeos)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggpubr)
+```
+
+```{r  echo=TRUE, message=FALSE}
+# import files: Time, RKI data
+time <- fread("./extData/Time.csv")
+policy <- fread("./extData/Policy.csv")
+policy1 <- fread("./extData/Policy.csv")
+RKI_data <- fread("./extData/DE_InfectionCases.csv")
+patientinfo <- fread("./extData/PatientInfo.csv")
+case <- fread("./extData/Case.csv")
+searchtrend <- fread("./extData/SearchTrend.csv")
+region <- fread("./extData/Region.csv")
+
+```
+
+
+
+```{r echo=FALSE}
+
+#hide warning messages
+options(warn=-1)
+
+```
+
 
 ## Claim 1 - Search Data Cases
 **Our initial motivation:**
+
 * We assume that people have been searching for coronavirus symptoms before test cases actually showed up.
 
 
 **Claim description in more detail:**
-*
-*
+
+* 1st
+* 2nd
 
 **Our approach:**
 
-```{r}
-library(magrittr)
-library(data.table)
-library(ggplot2)
+```{r echo=FALSE, message=FALSE}
 
-
-# importing Case, PatientInfo, Time, Searchtrend
-case <- fread("./extData/Case.csv")
-patientinfo <- fread("./extData/PatientInfo.csv")
-time <- fread("./extData/Time.csv")
-searchtrend <- fread("./extData/SearchTrend.csv")
 
 #create new column for number of daily cases, based on count of confirmed_date
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
@@ -54,8 +85,8 @@ ggplot(search_patientsubset, aes(x=date)) +
   geom_line(aes(y=flu, col = "flu"))
 ```
 
-
-## Claim 2 - Strict lockdown measures have prevented a thorough spread in South Korea
+## Claim 02 
+#### Strict lockdown measures have prevented a thorough spread in South Korea
 
 **Our initial motivation:**
 
@@ -75,32 +106,7 @@ ggplot(search_patientsubset, aes(x=date)) +
 * Within each type of policy we analysed the different measures in terms of time to daily cases.
 
 
-```{r echo=FALSE}
-#import libraries 
-
-library(magrittr)
-library(data.table)
-library(ggplot2)
-library(ggpubr)
-
-
-#hide warning messages
-#options(warn=-1)
-
-```
-
-```{r echo=FALSE}
-# import files: Time, RKI data
-time <- fread("./extData/Time.csv")
-policy <- fread("./extData/Policy.csv")
-policy1 <- fread("./extData/Policy.csv")
-RKI_data <- fread("./extData/DE_InfectionCases.csv")
-patientinfo <- fread("./extData/PatientInfo.csv")
-```
-
-
-
-```{r echo=FALSE, message=FALSE, include=FALSE}
+```{r echo=FALSE, message=FALSE, include=FALSE, message=FALSE}
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time[, confirmed_date:= as.IDate(confirmed_date)]
@@ -130,20 +136,18 @@ plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) +
   theme(legend.position="bottom") +
   theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
 
-
 ```
-
-
 
 ```{r  echo=FALSE}
 plot(plot_germany)
 ```
 
-###### Short Analysis
-* The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
-*Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
+**Short Analysis**
 
-```{r echo = FALSE}
+* The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
+* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
+
+```{r echo = FALSE, message=FALSE}
 
 nbPolicies <- policy1[, .N, by=type] %>% setorder(., -N) 
 
@@ -180,9 +184,13 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
 
 ```
 
+**Short analysis**
+
+* 1st
+* 2st
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 
 #total number of infection cases due to immigration
 contact_overseas <- patientinfo[infection_case == "overseas inflow", 
@@ -216,11 +224,9 @@ overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_lin
   theme(legend.position="bottom") +
   theme(legend.title=element_blank()) 
 
-
-
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 
@@ -248,7 +254,7 @@ immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_li
   theme(legend.title=element_blank()) 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 #1. Run plot in file: Lockdown_overseas
 #2. Run plot in Lockdown_immigration (current file)
 #Execute code below to get both plots next to each other
@@ -260,13 +266,14 @@ annotate_figure(plot_immigration,
 
 ```
 
-###### Short Analysis
+**Short Analysis**
+
 * After the number of daily cases related to overseas inflow reached a very high level, the government of South Korea imposed a mandatory 14-day Self-Quarantine. It seems that after a short time the number of daily cases related to overseas inflow could be reduced sharply and retained a relatively stable level.
 * After experiencing a peak in numbers, the government of South Korea establisehd special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
  
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time[, confirmed_date:= as.IDate(confirmed_date)]
@@ -333,7 +340,8 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 ```
 
-###### Short Analysis
+**Short Analysis**
+
 * After the number of daily cases have reached peak in March, numerous meausures with the aim of social distancing, such as delaying school start, were introduced. It seems that through these measures the number of daily cases could be reduced.
 * In the begining of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
 
@@ -359,33 +367,10 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 * Finally, we created a first map of South Korea showing the outbreaks in the different regions together with the specific locations of the different spreader events.
 
 
-```{r}
-# Load the libraries we need
-library(magrittr)
-library(data.table)
-library(ggplot2)
-library(tidyr)
-library(dplyr)
-library(maps)
-library(ggrepel)
-library(rgeos)
-library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
-```
-
-```{r}
-# Import the data files we will need for the analysis
-case <- fread("./extData/Case.csv")
-patientinfo <- fread("./extData/PatientInfo.csv")
-region <- fread("./extData/Region.csv")
-time <- fread("./extData/Time.csv")
-```
-
 #### First part of the analyis
 **Who was infected by with infection case? What role do the super spreader events play?**
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 # Plotting the main 10 infection cases
 top_infection_cases <- patientinfo %>% count(infection_case) %>% top_n(10, n) %>% arrange(desc(n))
 ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) + 
@@ -394,14 +379,15 @@ ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) +
   theme(axis.text.x=element_text(angle=45,hjust=1)) +
   labs(x="Infection Reason", y="Number of Cases", title = "Top 10 Infection Reasons")
 ```
-##### Short interim analysis:
+
+##### Short analysis:
 * Seems like apart from contact with a patient and oversees inflow, the main reasons for getting Covid-19 were related to some main events that happened throughout the country
 * The most cases are related to the Itaewon clubs. The church that we read about in the news is on 4th place when we don't count contact with patient, overseas inflow etc.
 
 ------
 Following, we'll create a graph comparing the total daily cases with the daily cases related to the super spreader events. Since the "patientinfo" table represents only a sample of the total amount of cases, we will first show, that patientinfo can indeedn be seen as a representative sample of the total amount of cases.
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 # Graph showing total daily cases over time, patientinfo database
 ## doesn't matter Leon already defined this 
 patientinfo[, daily_cases := .N, by = confirmed_date]
@@ -416,14 +402,14 @@ time[, confirmed_date:= as.IDate(confirmed_date)]
 total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line()
 
 # Putting both graphs next to each other to show patientinfo is a sample of time
-library(ggpubr)
+
 ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
 ```
 
 
 As one can see both graph lines follow a similar pattern over the same time period. Therefore, we will assume that we can treat patientinfo as a representative sample. 
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 # Calculating the daily cases and adding this as another column
 patientinfo[, daily_cases := .N, by = confirmed_date]
 
@@ -440,12 +426,13 @@ ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
   theme(legend.position="bottom", legend.title = element_blank())
 ```
 
-#### Short interim analyis:
+**Short analyis:**
+
 * The different spreader events match the daily cases over time pretty well!
 * Especially the first event (the Church!) shows that when cases exploded, a whole lot was related to the church everyone is blaming
 * Let's see when exactly the main event happened and match only the first event with overall cases
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 # Researching Dates of Spreader Events on the internet and creating a data table with the 5 main events
 super_spreader <- data.table(Event_Name= c("Itaewon Club", "Richway", "Guro-gu Call Center", "Shincheonji Church", "Coupang Logistics Center"), 
                            Date=c("2020-05-01", "2020-06-01", "2020-03-05", "2020-02-15", "2020-05-20"))
@@ -462,7 +449,8 @@ ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(col
 ```
 
 
-##### Short interim analyis
+**Short analyis**
+
 * This matches pretty well
 * Of course we need to take into account that the "real" amount of daily cases goes up to 800 so the almost 150 daily cases at this one day in March connected to the Church are not the total number of cases that day
 * Still, the impact the church outbreak had on the whole Covid situation in South Korea is pretty intense
@@ -472,46 +460,24 @@ ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(col
 #### Second part of the analyis
 **Where exactly did the events take place? Are we able to see a connection between large outbreaks and the Spreader events?**
 
-```{r}
+
+
+```{r echo=FALSE, message=FALSE}
 # subsetting to remove empty values in the case data table (no coordinates)
 case <- case[longitude != "-"]
 # change data type from character to double
 case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 
-# Plot coordinates with cases (different size according to number of cases) 
-ggplot(case, aes(x=longitude, y=latitude)) +
-  geom_point(aes(size=confirmed, col=province)) +
-  scale_x_continuous(labels = scales::comma)+  #to show comma numbers
-  scale_y_continuous(labels = scales::comma)+  # to show comma numbers
-  labs(title = "Confirmed Covid-cases mapped")
 ```
 
 
-```{r}
-# Now trying to combine this with a map of South Korea
-library("ggplot2")
-theme_set(theme_bw())
-
-# Plotting a map of South Korea alone
-world <- ne_countries(scale = "medium", returnclass = "sf")
-ggplot(data = world) +
-  geom_sf() +
-  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE)
-```
 
 
-```{r}
-# Adding the layer with covid cases we already plotted above
-ggplot(data = world) +
-  geom_sf() +
-  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
-  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
-  labs(title = "Confirmed Covid-cases mapped")
-```
-
-
-```{r}
+```{r echo=FALSE, message=FALSE}
 # Looking up exact locations of the main spreader events and adding a data frame with the exact longitude and latitude of every event
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
 spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Itaewon Clubs", "Richway", "Guro-gu Call Center", "Coupang Logistics Center"), 
                                        City = c("Daegu", "Seoul", "Seoul", "Guro-gu", "Gyeonggi"), 
                                        Longitude = c(128.600006, 127.024612, 127.024612, 126.8502, 127.2500), 
@@ -534,28 +500,8 @@ spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Ita
 
 
 
-#### Short analysis:
+**Short analysis:**
+
 * One can clearly see the connection between large outbreak locations and the spreader events. While multiple cases and events occurred in Seoul (North-West part of South Korea), the most interesting thing is the very first spreader event in Daegu (Shincheonji Church)
 * Interesting is as well, that his map shows not only part of the acutal cases (such as the Patientinfo table) but a real overview of the number of cases occurred in the different areas.
 * Thus, one can clearly see the influence the main first spreader event in the Shincheonji Church in Daegu had. One could argue that without the event the cases might have been seriously lower. However, further analysis would have had to be conducted in order to confirm this. 
-
-
-
-
-
----
-**NOTE**
-
-It works with almost all markdown flavours (the below blank line matters).
-
----
-
-
-
-
-
-
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
