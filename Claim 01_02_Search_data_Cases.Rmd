@@ -10,6 +10,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Claim 1 - Search Data Cases
+**Our initial motivation:**
+* We assume that people have been searching for coronavirus symptoms before test cases actually showed up.
+
+
+**Claim description in more detail:**
+*
+*
+
+**Our approach:**
+
 ```{r}
 library(magrittr)
 library(data.table)
@@ -22,7 +32,7 @@ patientinfo <- fread("./extData/PatientInfo.csv")
 time <- fread("./extData/Time.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
 
-#create column for # of daily cases, based on count of confirmed_date
+#create new column for number of daily cases, based on count of confirmed_date
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
 
 
@@ -39,8 +49,9 @@ search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01
 
 # plot final with two graphs:
 ggplot(search_patientsubset, aes(x=date)) +
-  geom_line(aes(y=daily_cases, colour = "daily_cases")) +
-  geom_line(aes(y=coronavirus, colour = "coronavirus"))
+  geom_line(aes(y=daily_cases, col = "daily_cases")) +
+  geom_line(aes(y=coronavirus, col = "coronavirus")) +
+  geom_line(aes(y=flu, col = "flu"))
 ```
 
 
