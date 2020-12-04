@@ -1,0 +1,507 @@
+---
+title: "Claim_01_Markdown"
+author: "Group 86 - Jana Schneider, Jana Jeggle, Felix Heim, Leon Gaertner"
+date: "4 12 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r echo = TRUE, message=FALSE}
+# Load the libraries we need
+library(magrittr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(maps)
+library(ggrepel)
+library(rgeos)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggpubr)
+```
+
+```{r  echo=TRUE, message=FALSE}
+# import files: Time, RKI data
+time <- fread("./extData/Time.csv")
+policy <- fread("./extData/Policy.csv")
+policy1 <- fread("./extData/Policy.csv")
+RKI_data <- fread("./extData/DE_InfectionCases.csv")
+patientinfo <- fread("./extData/PatientInfo.csv")
+case <- fread("./extData/Case.csv")
+searchtrend <- fread("./extData/SearchTrend.csv")
+region <- fread("./extData/Region.csv")
+
+```
+
+
+
+```{r echo=FALSE}
+
+#hide warning messages
+options(warn=-1)
+
+```
+
+
+## Claim 1 - Search Data Cases
+**Our initial motivation:**
+
+* We assume that people have been searching for coronavirus symptoms before test cases actually showed up.
+
+
+**Claim description in more detail:**
+
+* 1st
+* 2nd
+
+**Our approach:**
+
+```{r echo=FALSE, message=FALSE}
+
+
+#create new column for number of daily cases, based on count of confirmed_date
+patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
+
+
+#rename confirmed_date to date (otherwise not able to join)
+patientinfo[, date := sub("confirmed_date", "date", confirmed_date)]
+#change date class to "IDate"
+patientinfo[, date:= as.IDate(date)]
+
+#full outer join of patientinfo and searchtrend
+search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
+
+#subset search_patient to Jan-April 2020
+search_patientsubset <- search_patient[date >= "2020-01-01" & date < "2020-05-01"]
+
+# plot final with two graphs:
+ggplot(search_patientsubset, aes(x=date)) +
+  geom_line(aes(y=daily_cases, col = "daily_cases")) +
+  geom_line(aes(y=coronavirus, col = "coronavirus")) +
+  geom_line(aes(y=flu, col = "flu"))
+```
+
+## Claim 02 
+#### Strict lockdown measures have prevented a thorough spread in South Korea
+
+**Our initial motivation:**
+
+* After a massive increase in daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
+
+
+**Claim description in more detail:**
+
+* Stricter lockdown measures lead to a lower outbreak of the Covid-19 Virus 
+* Compared to other countries, for example Germany, the government of South Korea reacted more effectively and efficiently 
+
+
+**Our approach:**
+
+* We first compared the daily cases of South Korea with the ones of Germany.
+* Next we looked at the different types of government policy' measures.
+* Within each type of policy we analysed the different measures in terms of time to daily cases.
+
+
+```{r echo=FALSE, message=FALSE, include=FALSE, message=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+
+# total cases Germany
+
+RKI_data_UsFormat <- RKI_data[, confirmed_date := as.Date("Berichtsdatum", 
+                                                          format ="%d.%m.%y")]
+#change date class to "IDate"
+RKI_data_UsFormat[, confirmed_date:= as.IDate(confirmed_date)]
+RKI_data_UsFormat <- RKI_data_UsFormat[, Berichtsdatum := NULL]
+
+
+
+merge_GermanyUS <- merge(RKI_data_UsFormat, time, 
+                         by = "confirmed_date", all.y = TRUE)
+
+# plot
+plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
+  geom_line(aes(y=`daily_cases`,color="Germany"))+
+  geom_line(aes(y=`Anzahl COVID-19-Faelle pro Tag`,color="South Korea")) + 
+  labs(x= "confirmed date", y="daily cases",title="Daily cases: South Korea vs. Germany")+
+  geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
+                ymin=860,ymax=890,color="18 days"))+
+  geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
+                ymin=6400,ymax=6430,color="61 days"))+
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+
+```
+
+```{r  echo=FALSE}
+plot(plot_germany)
+```
+
+**Short Analysis**
+
+* The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
+* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
+
+```{r echo = FALSE, message=FALSE}
+
+nbPolicies <- policy1[, .N, by=type] %>% setorder(., -N) 
+
+
+plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
+  geom_bar(stat="identity", width = 0.7) + 
+  coord_flip() +
+  labs(x = "type of policy", y = "nb. of measures",
+       title="Policies of the Government")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+
+
+#Policy Starting Day Distribution
+
+policyDay = policy1[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
+
+policyDay <- policyDay[, count := .N, by=start_date]
+
+plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
+  geom_dotplot(dotsize = 2) +
+  
+  labs(x = "start date", y = "nb. of measures",
+       title="Nb. of introduced measures")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5), 
+        axis.text.y = element_blank())
+
+
+
+#put plots together
+
+ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
+
+
+
+```
+
+**Short analysis**
+
+* 1st
+* 2st
+
+
+```{r echo=FALSE, message=FALSE}
+
+#total number of infection cases due to immigration
+contact_overseas <- patientinfo[infection_case == "overseas inflow", 
+                                 .N, by = "confirmed_date"]
+
+#get subsets only for 3 different immigration policies 
+#IP_Special, IP_14Day, IP_ManTest
+immigration_policy <- policy[type == "Immigration"]
+
+IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
+IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
+IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
+
+
+#1. Run plot and safe it in overseas_plot
+#2. Go to file "Lockdown_immigration" and run the code at the very end to get
+#the figure
+
+
+overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
+  geom_vline(data = IP_Special, aes(xintercept = start_date, 
+                                    color = "Immigration\nprocedure"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
+                                  color = "Self\nquarantine"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
+                                    color = "Diagnostic\nTest US"), 
+             linetype = "longdash", show.legend = TRUE) +
+  labs(x = "confirmed date", y = "daily cases (overseas inflows)") +
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+
+```
+
+```{r echo=FALSE, message=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+
+
+
+immigration_policy <- policy[type == "Immigration"]
+
+IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
+IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
+IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
+
+immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  geom_vline(data = IP_Special, aes(xintercept = start_date, 
+                               color = "Immigration\nprocedure"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
+                                       color = "Self\nquarantine"), 
+             linetype = "longdash", show.legend = TRUE)+
+  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
+                                 color = "Diagnostic\nTest US"), 
+             linetype = "longdash", show.legend = TRUE)  +
+  labs(x = "confirmed date", y = "daily cases") + 
+  theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) 
+```
+
+```{r echo=FALSE, message=FALSE}
+#1. Run plot in file: Lockdown_overseas
+#2. Run plot in Lockdown_immigration (current file)
+#Execute code below to get both plots next to each other
+plot_immigration <- ggarrange(immigration_plot, overseas_plot,
+          ncol = 2, nrow = 1)
+annotate_figure(plot_immigration,
+                top = text_grob("International measures", 
+                                color = "black", size = 14))
+
+```
+
+**Short Analysis**
+
+* After the number of daily cases related to overseas inflow reached a very high level, the government of South Korea imposed a mandatory 14-day Self-Quarantine. It seems that after a short time the number of daily cases related to overseas inflow could be reduced sharply and retained a relatively stable level.
+* After experiencing a peak in numbers, the government of South Korea establisehd special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
+ 
+
+
+```{r echo=FALSE, message=FALSE}
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+
+
+#extract education measures from table policy
+date_education <- policy[type == "Education"]
+
+
+#plot start of education policies +
+#administration policies +
+#social policies
+#on infection cases per day within the time frame 
+
+ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  
+  #education policies
+  
+  geom_rect(aes(xmin=as.Date('2020-03-02'),xmax=as.Date('2020-04-06'),
+                ymin=740,ymax=743,color="School delay"))+
+  geom_text(aes(x = as.Date('2020-03-02'), y = 750, label = "School delay"),
+    size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  geom_rect(aes(xmin=as.Date('2020-04-09'),xmax=as.Date('2020-06-08'),
+                ymin=740,ymax=743,color="Online classes"))+  
+  geom_text(aes(x = as.Date('2020-04-09'), y = 750, label = "Online classes"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  #social policies 
+  
+  geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
+                ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
+  geom_text(aes(x = as.Date('2020-02-29'), 
+                y = 850, label = "Strong Social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
+                ymin=840,ymax=843,color="Weak social\ndistancing campaign"))+
+  geom_text(aes(x = as.Date('2020-05-01'), 
+                y = 850, label = "Weak social distancing campaign"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  #administrative policies
+  
+  geom_rect(aes(xmin=as.Date('2020-05-08'),xmax=as.Date('2020-06-07'),
+                ymin=110,ymax=113,color="Close bars\nand clubs"))+
+  geom_text(aes(x = as.Date('2020-05-08'), 
+                y = 120, label = "Close bars and clubs"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  geom_rect(aes(xmin=as.Date('2020-05-16'),xmax=as.Date('2020-06-30'),
+                ymin=170,ymax=173,color="Local government\nadministrative orders"))+
+  geom_text(aes(x = as.Date('2020-05-16'), 
+                y = 180, label = "Local gov. administrative orders"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  geom_rect(aes(xmin=as.Date('2020-05-21'),xmax=as.Date('2020-06-03'),
+                ymin=230,ymax=233,color="Close karaoke"))+
+  geom_text(aes(x = as.Date('2020-05-21'), 
+                y = 240, label = "Close karaoke"),
+            size = 3, vjust = 0, hjust = 0, color = "black")+
+  
+  labs(x = "confirmed date", y = "daily cases",
+       title="Administrative / Education / Social Measures")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+
+```
+
+**Short Analysis**
+
+* After the number of daily cases have reached peak in March, numerous meausures with the aim of social distancing, such as delaying school start, were introduced. It seems that through these measures the number of daily cases could be reduced.
+* In the begining of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
+
+
+
+
+## Claim 03
+#### Superspreader Events were the reason the Covid cases in South Korea turned out to be so intense in the first place.
+
+**Our initial motivation:**
+
+* When Covid first reach South Korea the number of cases was relatively low. However, with the "mysterious" patient Number 31, the serious increase in daily cases in South Korea began. A lot ot people worldwide including the local government blamed a Christian 'Cult' for this, since one member seemed to have spread the virus.
+
+**Claim description in more detail:**
+
+* Without this particular spreader event in the Shincheonji Church in Daegu the Covid-spread would have been seriously lower.
+* In fact, one could argue that without those spreader events the Covid-spread in South Korea wouldn't have been "serious" at all.
+
+**Our approach:**
+
+* In order to see, whether the public media was right, and the Church did indeed cause the first "serious" spread of the virus we first had a look at the most common reasons for a Covid infection within South Korea.
+* We then created a graph showing the daily cases related to the main spreader events in comparison to the overall daily cases.
+* Finally, we created a first map of South Korea showing the outbreaks in the different regions together with the specific locations of the different spreader events.
+
+
+#### First part of the analyis
+**Who was infected by with infection case? What role do the super spreader events play?**
+
+```{r echo=FALSE, message=FALSE}
+# Plotting the main 10 infection cases
+top_infection_cases <- patientinfo %>% count(infection_case) %>% top_n(10, n) %>% arrange(desc(n))
+ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) + 
+  geom_bar(stat="identity", width = 0.5, fill="red") +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=45,hjust=1)) +
+  labs(x="Infection Reason", y="Number of Cases", title = "Top 10 Infection Reasons")
+```
+
+##### Short analysis:
+* Seems like apart from contact with a patient and oversees inflow, the main reasons for getting Covid-19 were related to some main events that happened throughout the country
+* The most cases are related to the Itaewon clubs. The church that we read about in the news is on 4th place when we don't count contact with patient, overseas inflow etc.
+
+------
+Following, we'll create a graph comparing the total daily cases with the daily cases related to the super spreader events. Since the "patientinfo" table represents only a sample of the total amount of cases, we will first show, that patientinfo can indeedn be seen as a representative sample of the total amount of cases.
+
+```{r echo=FALSE, message=FALSE}
+# Graph showing total daily cases over time, patientinfo database
+## doesn't matter Leon already defined this 
+patientinfo[, daily_cases := .N, by = confirmed_date]
+total_cases_patientinfo <- ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") + labs(x="Time", y="Cases per Day")
+
+# Graph showing total daily cases over time, time database
+## doesn't matter for final markdown, only so this will work here
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line()
+
+# Putting both graphs next to each other to show patientinfo is a sample of time
+
+ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
+```
+
+
+As one can see both graph lines follow a similar pattern over the same time period. Therefore, we will assume that we can treat patientinfo as a representative sample. 
+
+```{r echo=FALSE, message=FALSE}
+# Calculating the daily cases and adding this as another column
+patientinfo[, daily_cases := .N, by = confirmed_date]
+
+# Adding the 5 big Spreader Events to our Graph showing Daily Cases over Time
+ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") +
+  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), aes(colour = "Shincheonji Church")) +
+  geom_line(data = subset(patientinfo, infection_case=="Guro-gu Call Center"), aes(colour = "Guro-gu Call Center")) +
+  geom_line(data = subset(patientinfo, infection_case=="Itaewon Clubs"), aes(colour = "Itaewon Clubs")) +
+  geom_line(data = subset(patientinfo, infection_case=="Coupang Logistics Center"), aes(colour = "Coupang Logistics Center")) +
+  geom_line(data = subset(patientinfo, infection_case=="Richway"), aes(colour = "Richway")) +
+  labs(x="Time", y="Cases per Day", title = "Daily Cases related to Spreader Events vs. Total Daily Cases") +
+  geom_hline(yintercept=100, color="orange") +
+  theme(legend.position="bottom", legend.title = element_blank())
+```
+
+**Short analyis:**
+
+* The different spreader events match the daily cases over time pretty well!
+* Especially the first event (the Church!) shows that when cases exploded, a whole lot was related to the church everyone is blaming
+* Let's see when exactly the main event happened and match only the first event with overall cases
+
+```{r echo=FALSE, message=FALSE}
+# Researching Dates of Spreader Events on the internet and creating a data table with the 5 main events
+super_spreader <- data.table(Event_Name= c("Itaewon Club", "Richway", "Guro-gu Call Center", "Shincheonji Church", "Coupang Logistics Center"), 
+                           Date=c("2020-05-01", "2020-06-01", "2020-03-05", "2020-02-15", "2020-05-20"))
+# Convert Date column as date, so we can use it in one graph with our Patientinfo & daily cases
+super_spreader[, Date:=as.Date(Date)]
+
+# Showing Date of Shincheonji Church Outbreak and the cases that were connected with this event in one graph
+ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
+  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), colour="red") +
+  geom_vline(data = subset(super_spreader, Event_Name=="Shincheonji Church"),
+             aes(xintercept = Date, colour = "Shincheonji Church (15. February 2020)")) +
+  labs(x="Time", y="Cases per Day", title = "Covid-19 Outbreak after Shincheonji Church Event") +
+  theme(legend.position="bottom", legend.title = element_blank())
+```
+
+
+**Short analyis**
+
+* This matches pretty well
+* Of course we need to take into account that the "real" amount of daily cases goes up to 800 so the almost 150 daily cases at this one day in March connected to the Church are not the total number of cases that day
+* Still, the impact the church outbreak had on the whole Covid situation in South Korea is pretty intense
+
+
+
+#### Second part of the analyis
+**Where exactly did the events take place? Are we able to see a connection between large outbreaks and the Spreader events?**
+
+
+
+```{r echo=FALSE, message=FALSE}
+# subsetting to remove empty values in the case data table (no coordinates)
+case <- case[longitude != "-"]
+# change data type from character to double
+case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+# Looking up exact locations of the main spreader events and adding a data frame with the exact longitude and latitude of every event
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Itaewon Clubs", "Richway", "Guro-gu Call Center", "Coupang Logistics Center"), 
+                                       City = c("Daegu", "Seoul", "Seoul", "Guro-gu", "Gyeonggi"), 
+                                       Longitude = c(128.600006, 127.024612, 127.024612, 126.8502, 127.2500), 
+                                       Latitude = c(35.866669, 37.532600, 37.532600 ,37.49447,37.5000))
+
+
+# Adding the locations of the spreader events and also adding some aestetics to make the map look more appealing or real
+  ggplot(data = world) +
+    geom_sf(fill= "antiquewhite") +
+    geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
+    geom_text_repel(data = spreader_event_locations, aes(x = Longitude, y = Latitude, label = Event_Name), 
+                    fontface = "bold", nudge_x = c(1, -2, 2, 2, -1), 
+                    nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
+    coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+    theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
+    labs(title = "Confirmed Covid-cases mapped")
+```
+
+
+
+
+
+**Short analysis:**
+
+* One can clearly see the connection between large outbreak locations and the spreader events. While multiple cases and events occurred in Seoul (North-West part of South Korea), the most interesting thing is the very first spreader event in Daegu (Shincheonji Church)
+* Interesting is as well, that his map shows not only part of the acutal cases (such as the Patientinfo table) but a real overview of the number of cases occurred in the different areas.
+* Thus, one can clearly see the influence the main first spreader event in the Shincheonji Church in Daegu had. One could argue that without the event the cases might have been seriously lower. However, further analysis would have had to be conducted in order to confirm this. 
