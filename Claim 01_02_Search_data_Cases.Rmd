@@ -342,6 +342,204 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 
 
+## Claim 03
+#### Superspreader Events were the reason the Covid cases in South Korea turned out to be so intense in the first place.
+
+**Our initial motivation:**
+
+* When Covid first reach South Korea the number of cases was relatively low. However, with the "mysterious" patient Number 31, the serious increase in daily cases in South Korea began. A lot ot people worldwide including the local government blamed a Christian 'Cult' for this, since one member seemed to have spread the virus.
+
+**Claim description in more detail:**
+
+* Without this particular spreader event in the Shincheonji Church in Daegu the Covid-spread would have been seriously lower.
+* In fact, one could argue that without those spreader events the Covid-spread in South Korea wouldn't have been "serious" at all.
+
+**Our approach:**
+
+* In order to see, whether the public media was right, and the Church did indeed cause the first "serious" spread of the virus we first had a look at the most common reasons for a Covid infection within South Korea.
+* We then created a graph showing the daily cases related to the main spreader events in comparison to the overall daily cases.
+* Finally, we created a first map of South Korea showing the outbreaks in the different regions together with the specific locations of the different spreader events.
+
+
+```{r}
+# Load the libraries we need
+library(magrittr)
+library(data.table)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(maps)
+library(ggrepel)
+library(rgeos)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+```
+
+```{r}
+# Import the data files we will need for the analysis
+case <- fread("./extData/Case.csv")
+patientinfo <- fread("./extData/PatientInfo.csv")
+region <- fread("./extData/Region.csv")
+time <- fread("./extData/Time.csv")
+```
+
+#### First part of the analyis
+**Who was infected by with infection case? What role do the super spreader events play?**
+
+```{r}
+# Plotting the main 10 infection cases
+top_infection_cases <- patientinfo %>% count(infection_case) %>% top_n(10, n) %>% arrange(desc(n))
+ggplot(data = top_infection_cases, aes(x=reorder(infection_case, -n), y=n)) + 
+  geom_bar(stat="identity", width = 0.5, fill="red") +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=45,hjust=1)) +
+  labs(x="Infection Reason", y="Number of Cases", title = "Top 10 Infection Reasons")
+```
+##### Short interim analysis:
+* Seems like apart from contact with a patient and oversees inflow, the main reasons for getting Covid-19 were related to some main events that happened throughout the country
+* The most cases are related to the Itaewon clubs. The church that we read about in the news is on 4th place when we don't count contact with patient, overseas inflow etc.
+
+------
+Following, we'll create a graph comparing the total daily cases with the daily cases related to the super spreader events. Since the "patientinfo" table represents only a sample of the total amount of cases, we will first show, that patientinfo can indeedn be seen as a representative sample of the total amount of cases.
+
+```{r}
+# Graph showing total daily cases over time, patientinfo database
+## doesn't matter Leon already defined this 
+patientinfo[, daily_cases := .N, by = confirmed_date]
+total_cases_patientinfo <- ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") + labs(x="Time", y="Cases per Day")
+
+# Graph showing total daily cases over time, time database
+## doesn't matter for final markdown, only so this will work here
+#total cases in Korea per day
+time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time[, confirmed_date:= as.IDate(confirmed_date)]
+total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line()
+
+# Putting both graphs next to each other to show patientinfo is a sample of time
+library(ggpubr)
+ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
+```
+
+
+As one can see both graph lines follow a similar pattern over the same time period. Therefore, we will assume that we can treat patientinfo as a representative sample. 
+
+```{r}
+# Calculating the daily cases and adding this as another column
+patientinfo[, daily_cases := .N, by = confirmed_date]
+
+# Adding the 5 big Spreader Events to our Graph showing Daily Cases over Time
+ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") +
+  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), aes(colour = "Shincheonji Church")) +
+  geom_line(data = subset(patientinfo, infection_case=="Guro-gu Call Center"), aes(colour = "Guro-gu Call Center")) +
+  geom_line(data = subset(patientinfo, infection_case=="Itaewon Clubs"), aes(colour = "Itaewon Clubs")) +
+  geom_line(data = subset(patientinfo, infection_case=="Coupang Logistics Center"), aes(colour = "Coupang Logistics Center")) +
+  geom_line(data = subset(patientinfo, infection_case=="Richway"), aes(colour = "Richway")) +
+  labs(x="Time", y="Cases per Day", title = "Daily Cases related to Spreader Events vs. Total Daily Cases") +
+  geom_hline(yintercept=100, color="orange") +
+  theme(legend.position="bottom", legend.title = element_blank())
+```
+
+#### Short interim analyis:
+* The different spreader events match the daily cases over time pretty well!
+* Especially the first event (the Church!) shows that when cases exploded, a whole lot was related to the church everyone is blaming
+* Let's see when exactly the main event happened and match only the first event with overall cases
+
+```{r}
+# Researching Dates of Spreader Events on the internet and creating a data table with the 5 main events
+super_spreader <- data.table(Event_Name= c("Itaewon Club", "Richway", "Guro-gu Call Center", "Shincheonji Church", "Coupang Logistics Center"), 
+                           Date=c("2020-05-01", "2020-06-01", "2020-03-05", "2020-02-15", "2020-05-20"))
+# Convert Date column as date, so we can use it in one graph with our Patientinfo & daily cases
+super_spreader[, Date:=as.Date(Date)]
+
+# Showing Date of Shincheonji Church Outbreak and the cases that were connected with this event in one graph
+ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
+  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), colour="red") +
+  geom_vline(data = subset(super_spreader, Event_Name=="Shincheonji Church"),
+             aes(xintercept = Date, colour = "Shincheonji Church (15. February 2020)")) +
+  labs(x="Time", y="Cases per Day", title = "Covid-19 Outbreak after Shincheonji Church Event") +
+  theme(legend.position="bottom", legend.title = element_blank())
+```
+
+
+##### Short interim analyis
+* This matches pretty well
+* Of course we need to take into account that the "real" amount of daily cases goes up to 800 so the almost 150 daily cases at this one day in March connected to the Church are not the total number of cases that day
+* Still, the impact the church outbreak had on the whole Covid situation in South Korea is pretty intense
+
+
+
+#### Second part of the analyis
+**Where exactly did the events take place? Are we able to see a connection between large outbreaks and the Spreader events?**
+
+```{r}
+# subsetting to remove empty values in the case data table (no coordinates)
+case <- case[longitude != "-"]
+# change data type from character to double
+case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+
+# Plot coordinates with cases (different size according to number of cases) 
+ggplot(case, aes(x=longitude, y=latitude)) +
+  geom_point(aes(size=confirmed, col=province)) +
+  scale_x_continuous(labels = scales::comma)+  #to show comma numbers
+  scale_y_continuous(labels = scales::comma)+  # to show comma numbers
+  labs(title = "Confirmed Covid-cases mapped")
+```
+
+
+```{r}
+# Now trying to combine this with a map of South Korea
+library("ggplot2")
+theme_set(theme_bw())
+
+# Plotting a map of South Korea alone
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE)
+```
+
+
+```{r}
+# Adding the layer with covid cases we already plotted above
+ggplot(data = world) +
+  geom_sf() +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  labs(title = "Confirmed Covid-cases mapped")
+```
+
+
+```{r}
+# Looking up exact locations of the main spreader events and adding a data frame with the exact longitude and latitude of every event
+spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Itaewon Clubs", "Richway", "Guro-gu Call Center", "Coupang Logistics Center"), 
+                                       City = c("Daegu", "Seoul", "Seoul", "Guro-gu", "Gyeonggi"), 
+                                       Longitude = c(128.600006, 127.024612, 127.024612, 126.8502, 127.2500), 
+                                       Latitude = c(35.866669, 37.532600, 37.532600 ,37.49447,37.5000))
+
+
+# Adding the locations of the spreader events and also adding some aestetics to make the map look more appealing or real
+  ggplot(data = world) +
+    geom_sf(fill= "antiquewhite") +
+    geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
+    geom_text_repel(data = spreader_event_locations, aes(x = Longitude, y = Latitude, label = Event_Name), 
+                    fontface = "bold", nudge_x = c(1, -2, 2, 2, -1), 
+                    nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
+    coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+    theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
+    labs(title = "Confirmed Covid-cases mapped")
+```
+
+
+
+
+
+#### Short analysis:
+* One can clearly see the connection between large outbreak locations and the spreader events. While multiple cases and events occurred in Seoul (North-West part of South Korea), the most interesting thing is the very first spreader event in Daegu (Shincheonji Church)
+* Interesting is as well, that his map shows not only part of the acutal cases (such as the Patientinfo table) but a real overview of the number of cases occurred in the different areas.
+* Thus, one can clearly see the influence the main first spreader event in the Shincheonji Church in Daegu had. One could argue that without the event the cases might have been seriously lower. However, further analysis would have had to be conducted in order to confirm this. 
 
 
 
@@ -355,7 +553,7 @@ It works with almost all markdown flavours (the below blank line matters).
 ---
 
 
-## Claim 3 - Region and Superspreaders
+
 
 
 
