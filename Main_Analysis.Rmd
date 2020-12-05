@@ -95,8 +95,8 @@ ggplot(search_patientsubset, aes(x=date)) +
 
 **Claim description in more detail:**
 
-* Stricter lockdown measures lead to a lower outbreak of the Covid-19 Virus 
-* Compared to other countries, for example Germany, the government of South Korea reacted more effectively and efficiently 
+* Stricter lockdown measures lead to a lower outbreak of the Covid-19 Virus. 
+* Compared to other countries, for example Germany, the government of South Korea reacted more effectively and efficiently. 
 
 
 **Our approach:**
@@ -145,7 +145,7 @@ plot(plot_germany)
 **Short Analysis**
 
 * The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
-* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level.  
+* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level again.  
 
 ```{r echo = FALSE, message=FALSE}
 
@@ -186,7 +186,7 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
 
 **Short analysis**
 
-* The number of immigration and education policies dominate the other measures. This is related to the fact that immigration measures are counted for each countery and education measures for each school type
+* The number of immigration and education policies dominate the other measures. This is related to the fact that immigration measures are counted for each country and education measures for each school type.
 
 * Shortly after the number of infection cases surged the government of South Korea reacted with numerous measures in all kind of area. The many measures in the middle of April are related to the Online-school opening measures that all took place at once for each type of school. 
 
@@ -269,8 +269,9 @@ annotate_figure(plot_immigration,
 
 **Short Analysis**
 
+
+* After experiencing a peak in numbers, the government of South Korea established special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
 * After the number of daily cases related to overseas inflow reached a very high level, the government of South Korea imposed a mandatory 14-day Self-Quarantine. It seems that after a short time the number of daily cases related to overseas inflow could be reduced sharply and retained a relatively stable level.
-* After experiencing a peak in numbers, the government of South Korea establisehd special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
  
 
 
@@ -344,7 +345,7 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 **Short Analysis**
 
 * After the number of daily cases have reached peak in March, numerous meausures with the aim of social distancing, such as delaying school start, were introduced. It seems that through these measures the number of daily cases could be reduced.
-* In the begining of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
+* In the beginning of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
 
 
 
