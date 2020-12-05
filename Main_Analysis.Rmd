@@ -2,7 +2,9 @@
 title: "COVID-19 Analysis in South Korea"
 author: "Group 86 - Jana Schneider, Jana Jeggle, Felix Heim, Leon Gaertner"
 date: "4 12 2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 <p>&nbsp;</p>
