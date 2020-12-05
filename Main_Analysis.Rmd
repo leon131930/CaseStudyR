@@ -97,8 +97,9 @@ options(warn=-1)
 
 We join the tables patientInfo and Searchtrend by confirmed_date.
 Then, we plot the number of daily cases and searches as line chart.
-As the search data is not comparable to the daily confirmed cases, we introduce
+As the search data is not comparable with the daily confirmed cases on the same scale, we introduce
 an additional y-Axis for the search data.
+As the data for the search volume contains many values below 0.0001, we multiply the scale for the data with 10.000.
 
 <p>&nbsp;</p>
 
@@ -127,9 +128,8 @@ ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) 
   geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
   labs(title="Daily covid cases & search volume for 'coronavirus'")+
   scale_y_continuous(
-    # Features of the first axis
     name = "daily confirmed cases",
-    # Add a second axis and specify its features
+    # Add a second axis, with a scale *10k 
     sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = searchcolour),
@@ -148,9 +148,8 @@ ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) 
   geom_line(aes(y=flu*100, col = "Searches for 'flu'")) +
   labs(title="Daily covid cases & search volume for 'flu'")+
   scale_y_continuous(
-    # Features of the first axis
     name = "daily confirmed cases",
-    # Add a second axis and specify its features
+    # Add a second axis, with a scale *10k 
     sec.axis = sec_axis(trans=~./100*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = searchcolour),
@@ -207,8 +206,8 @@ ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) 
 **Our approach:**
 
 * We first compared the daily cases of South Korea with the ones of Germany.
-* Next we looked at the different types of government policy' measures.
-* Within each type of policy we analysed the different measures in terms of time to daily cases.
+* Next we looked at the different types of government policy measures.
+* Within each type of policy we analyzed the different measures in terms of time to daily cases.
 
 <p>&nbsp;</p>
 
