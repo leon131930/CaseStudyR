@@ -4,6 +4,33 @@ author: "Group 86 - Jana Schneider, Jana Jeggle, Felix Heim, Leon Gaertner"
 date: "4 12 2020"
 output: html_document
 ---
+```{r , echo=FALSE, message=FALSE}
+
+# #General libraries
+# install.packages("magrittr")
+# install.packages("data.table")
+# install.packages("ggplot2")
+# install.packages("tidyr")
+# install.packages("dplyr")
+# install.packages("ggpubr")
+# 
+# #required for Claim 1
+# install.packages("patchwork")
+# install.packages("hrbrthemes")
+# 
+# #required for Claim 3
+# install.packages("maps")
+# install.packages("ggrepel")
+# install.packages("rgeos")
+# install.packages("sf")
+# install.packages("rnaturalearth")
+# install.packages("rnaturalearthdata")
+
+
+
+```
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,6 +49,8 @@ library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggpubr)
+library(patchwork)
+library(hrbrthemes)
 ```
 
 ```{r  echo=TRUE, message=FALSE}
@@ -43,7 +72,7 @@ region <- fread("./extData/Region.csv")
 ```{r echo=FALSE}
 
 #hide warning messages
-options(warn=-1)
+#options(warn=-1)
 
 ```
 
@@ -68,18 +97,6 @@ an additional y-Axis for the search data.
 
 
 ```{r echo=FALSE, message=FALSE}
-
-library(magrittr)
-library(data.table)
-library(ggplot2)
-library(dplyr)
-library(patchwork)
-library(hrbrthemes)
-
-# importing Case, PatientInfo, Searchtrend
-case <- fread("./extData/Case.csv")
-patientinfo <- fread("./extData/PatientInfo.csv")
-searchtrend <- fread("./extData/SearchTrend.csv")
 
 #create new column for number of daily cases, based on count of confirmed_date
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
