@@ -129,10 +129,9 @@ ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) 
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
   geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
   labs(title="Daily covid cases & search volume for 'coronavirus'")+
-  scale_y_continuous(
-    name = "daily confirmed cases",
+  scale_y_continuous(name = "daily confirmed cases",
     # Add a second axis, with a scale *10k 
-    sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
+  sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = searchcolour),
         axis.title.y.left = element_text(color = dailycasecolour))
@@ -605,14 +604,18 @@ spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Ita
 
 # Adding the locations of the spreader events and also adding some aestetics to make the map look more appealing or real
   ggplot(data = world) +
-    geom_sf(fill= "antiquewhite") +
-    geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
-    geom_text_repel(data = spreader_event_locations, aes(x = Longitude, y = Latitude, label = Event_Name), 
-                    fontface = "bold", nudge_x = c(1, -2, 2, 2, -1), 
-                    nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
-    coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
-    theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
-    labs(title = "Confirmed Covid-cases mapped")
+  geom_sf(fill= "antiquewhite") +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed,
+                              color = province)) +
+  geom_text_repel(data = spreader_event_locations,
+                  aes(x = Longitude,y = Latitude, label = Event_Name), 
+    fontface = "bold", nudge_x = c(1, -2, 2, 2, -1),
+    nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  theme(panel.grid.major = element_line(color = gray(.5),
+    linetype = "dashed", size = 0.2),
+    panel.background = element_rect(fill = "aliceblue")) +
+  labs(title = "Confirmed Covid-cases mapped")
 ```
 
 
