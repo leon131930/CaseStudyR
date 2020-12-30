@@ -13,6 +13,7 @@ case <- fread("./extData/Case.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
 
+case
 #create new column for number of daily cases, based on count of confirmed_date
 patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
 
@@ -98,4 +99,35 @@ ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) 
   theme(legend.position="right", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = searchcolour),
         axis.title.y.left = element_text(color = dailycasecolour))
+
+#################################################################
+#taking now the daily cases from time table
+time <- fread("./extData/Time.csv")
+time <- time[, date:= as.IDate(date, format= "%d/%m/%Y")]
+
+ggplot(time[date < "2020-05-01"], aes(x=date)) +geom_line(aes(y=daily_cases))
+merged_dt <- merge(time, searchtrend, by = "date", all = TRUE)
+
+
+#plot with 2 axis
+ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-15")],aes(x=date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
+  geom_line(aes(y=(cold+flu+coronavirus)*8, col = "Searches for 'coronavirus'")) +
+  labs(title="Daily covid cases & search volume for 'coronavirus'")+
+  scale_y_continuous(
+    # Features of the first axis
+    name = "daily confirmed cases",
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans=~./8*10000, name="Search Volume",labels = scales::comma))+
+  theme(legend.position="bottom", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = searchcolour),
+        axis.title.y.left = element_text(color = dailycasecolour))
+
+
+
+ggplot(merged_dt[date %between% c("2019-12-01", "2020-05-01")],aes(x=date)) +
+  geom_line(aes(y=coronavirus))
+                 
+merged_dt[date %between% c("2019-12-01", "2020-05-01"), max(coronavirus)]
 
