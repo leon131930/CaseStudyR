@@ -20,4 +20,10 @@ timeProvince[, date:= as.IDate(date)]
 # Province Sejong is missing in table Weather -> not all confirmed cases can be found in melted_dt
 melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 
-# Plot data
+# Plot data: avg weather
+ggplot(melted_dt,aes(avg_temp,daily_cases))+geom_point()
+
+#Plot data: avg relative humidity
+ggplot(melted_dt,aes(avg_relative_humidity,daily_cases))+geom_point()
+
+# Correlation
