@@ -27,3 +27,5 @@ ggplot(melted_dt,aes(avg_temp,daily_cases))+geom_point()
 ggplot(melted_dt,aes(avg_relative_humidity,daily_cases))+geom_point()
 
 # Correlation
+cor_temp <- cor(melted_dt$avg_temp, melted_dt$daily_cases, method = 'pearson')
+cor_humidity <- cor(melted_dt$avg_relative_humidity, melted_dt$daily_cases, method = 'pearson')
