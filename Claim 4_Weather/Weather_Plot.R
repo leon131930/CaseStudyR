@@ -30,6 +30,23 @@ ggplot(melted_dt,aes(avg_relative_humidity,daily_cases,color=province))+geom_poi
 cor_temp <- cor(melted_dt$avg_temp, melted_dt$daily_cases, method = 'pearson')
 cor_humidity <- cor(melted_dt$avg_relative_humidity, melted_dt$daily_cases, method = 'pearson')
 
+# Test: Correlation temperature and daily cases
+# Nullhypothese: Keine Korrelation
+ho_0 <- 0
+# Na's in Daten?
+anyNA(melted_dt$avg_temp, melted_dt$daily_cases)
+n <- nrow(melted_dt)
+# Teststatistik
+t <- cor_temp/ sqrt(1-cor_temp^2)*sqrt(n-2)
+# kritischer Wert
+alpha <- 0.05
+z_krit <- qnorm(alpha/2)
+# Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
+
+
+
+
+
 
 # Data without province Daegu (Shincheonji church is located there -> Superspreader Event)
 # Prepare data
