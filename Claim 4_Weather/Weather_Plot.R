@@ -40,9 +40,9 @@ n <- nrow(melted_dt)
 t <- cor_temp/ sqrt(1-cor_temp^2)*sqrt(n-2)
 # kritischer Wert
 alpha <- 0.05
-z_krit <- qnorm(alpha/2)
+z_krit <- qnorm(1-alpha/2)
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
-
+abs(t) > z_krit
 
 
 
