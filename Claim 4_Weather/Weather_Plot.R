@@ -4,7 +4,8 @@ library(magrittr)
 library(data.table)
 library(ggplot2)
 library(ggpubr)
-
+install.packages('hexbin')
+library(hexbin)
 # Import files: Weather, TimeProvince
 weather <- fread("./extData/Weather.csv")
 timeProvince <- fread("./extData/TimeProvince.csv")
@@ -21,7 +22,10 @@ timeProvince[, date:= as.IDate(date)]
 melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 
 # Plot data: avg weather
-ggplot(melted_dt,aes(avg_temp,daily_cases,color=province))+geom_point()
+ggplot(melted_dt,aes(avg_temp,daily_cases,color=province))+geom_point() 
+ggplot(melted_dt,aes(avg_temp,daily_cases))+geom_point() +
+  geom_smooth(method = "loess")
+
 
 #Plot data: avg relative humidity
 ggplot(melted_dt,aes(avg_relative_humidity,daily_cases,color=province))+geom_point()
@@ -45,6 +49,25 @@ alpha <- 0.05
 z_krit <- qnorm(1-alpha/2)
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
 abs(t) > z_krit
+#Ergebnis: Nullhypothese wird verworfen
+
+
+
+
+
+# Pearson Test
+# Nullhypothese: negative Korrelation zwischen temperature und daily cases
+rho_0 <- 0
+# Na's in Daten?
+anyNA(melted_dt$avg_temp, melted_dt$daily_cases)
+n <- nrow(melted_dt)
+# Teststatistik
+t_2 <- cor_temp/ sqrt(1-cor_temp^2)*sqrt(n-2)
+# kritischer Wert
+alpha <- 0.05
+z_krit_2 <- qnorm(1-alpha)
+t_2 > z_krit_2
+#Ergebnis: Nullhypothese wird nicht verworfen
 
 
 # Spearman Test: Correlation temperature and daily cases
@@ -57,13 +80,29 @@ n <- nrow(melted_dt)
 t_spear <- cor_temp_spear/ sqrt(1-cor_temp_spear^2)*sqrt(n-2)
 # kritischer Wert
 alpha <- 0.05
-z_krit <- qt(p=0.95,df=n-1)
+# T-verteilung mit n-1 Freiheitsgraden
+z_krit_spear <- qt(p=0.975,df=n-1)
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
 abs(t_spear) > z_krit
+#Ergebnis: Nullhypothese kann nicht verworfen werden
 
 
 
 
+# Spearman Test: Correlation temperature and daily cases
+# Nullhypothese: negative Korrelation zwischen temperature und daily cases
+rho_0 <- 0
+# Na's in Daten?
+anyNA(melted_dt$avg_temp, melted_dt$daily_cases)
+n <- nrow(melted_dt)
+# Teststatistik
+t_spear_2 <- cor_temp_spear/ sqrt(1-cor_temp_spear^2)*sqrt(n-2)
+# kritischer Wert
+alpha <- 0.05
+# T-verteilung mit n-1 Freiheitsgraden
+z_krit_spear_2 <- qt(p=0.95,df=n-1)
+t_spear > z_krit
+#Ergebnis: Nullhypothese kann nicht verworfen werden
 
 
 
