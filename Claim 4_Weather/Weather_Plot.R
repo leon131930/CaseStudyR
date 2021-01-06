@@ -4,8 +4,6 @@ library(magrittr)
 library(data.table)
 library(ggplot2)
 library(ggpubr)
-install.packages('hexbin')
-library(hexbin)
 # Import files: Weather, TimeProvince
 weather <- fread("./extData/Weather.csv")
 timeProvince <- fread("./extData/TimeProvince.csv")
@@ -68,6 +66,30 @@ alpha <- 0.05
 z_krit_2 <- qnorm(1-alpha)
 t_2 > z_krit_2
 #Ergebnis: Nullhypothese wird nicht verworfen
+
+
+# Pearson Test
+# Nullhypothese: Korrelation zwischen temperature und daily cases kleiner als -0.3
+rho_0 <- -0.3
+# Na's in Daten?
+anyNA(melted_dt$avg_temp, melted_dt$daily_cases)
+n <- nrow(melted_dt)
+# Teststatistik
+t_3 <- 1/2 * (log((1 + cor_temp) / (1 - cor_temp)) -log((1 + -0.3) / (1 - -0.3))) * sqrt(n - 3)
+# kritischer Wert
+alpha <- 0.05
+z_krit_3 <- qnorm(1-alpha)
+t_3 > z_krit_3
+#Ergebnis: Nullhypothese wird verworfen
+
+
+
+
+
+
+
+
+
 
 
 # Spearman Test: Correlation temperature and daily cases
