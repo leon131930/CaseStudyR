@@ -52,7 +52,7 @@ ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) 
 time <- fread("./extData/Time.csv")
 time <- time[, date:= as.IDate(date, format= "%d/%m/%Y")]
 
-ggplot(time[date < "2020-05-01"], aes(x=date)) +geom_line(aes(y=daily_cases))
+#merge time table and searchtrend table, full outer join
 merged_dt <- merge(time, searchtrend, by = "date", all = TRUE)
 
 
@@ -132,7 +132,7 @@ for(i in 1:m){
 
 #plot T_permuted as histogram
 ggplot( data.table(T_permuted), aes(x = T_permuted)) +
-  geom_histogram() +
+  geom_histogram(bins = 40) +
   geom_vline(aes(xintercept= corr, color = "oberserved correlation"))
 
 
