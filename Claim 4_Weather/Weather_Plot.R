@@ -20,7 +20,11 @@ timeProvince[, date:= as.IDate(date)]
 melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 
 # Plot data: avg weather
-ggplot(melted_dt,aes(avg_temp,daily_cases,color=province))+geom_point() 
+ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "remaining provinces")))+geom_point() +
+  labs(x = "average temperature", y = "daily cases", 
+       title = "No correlation between avg temp & daily cases") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+
 ggplot(melted_dt,aes(avg_temp,daily_cases))+geom_point() +
   geom_smooth(method = "loess")
 
@@ -136,7 +140,8 @@ t_spear > z_krit
 # Prepare data
 melted_dt_without_Daegu = melted_dt[province!='Daegu']
 # Plot data: avg weather
-ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases,color=province))+geom_point()
+ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
+  geom_smooth(method = "loess")
 # Plot data: avg relative humidity
 ggplot(melted_dt_without_Daegu,aes(avg_relative_humidity,daily_cases,color=province))+geom_point()
 # Correlation
