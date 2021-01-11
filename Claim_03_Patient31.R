@@ -133,6 +133,32 @@ ggplot(case_old, aes(x=longitude, y=latitude)) +
   scale_y_continuous(labels = scales::comma)+  # to show comma numbers
   labs(title = "Confirmed Covid-cases mapped")
 
+#Plotting the world, especially South Korea
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  xlab("Longitude") + ylab("Latitude") +
+  ggtitle("World map")
+# How can we zoom this in on South Korea in a way that it matches the dots we created above?
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE)
 
+#Creating datatable with spreader locations
+spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Itaewon Clubs", "Richway", "Guro-gu Call Center", "Coupang Logistics Center"), 
+                                       City = c("Daegu", "Seoul", "Seoul", "Guro-gu", "Gyeonggi"), 
+                                       Longitude = c(128.600006, 127.024612, 127.024612, 126.8502, 127.2500), 
+                                       Latitude = c(35.866669, 37.532600, 37.532600 ,37.49447,37.5000))
+
+#Showing a first version of the graph
+ggplot(data = world) +
+  geom_sf(fill= "antiquewhite") +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = province)) +
+  geom_text_repel(data = spreader_event_locations, aes(x = Longitude, y = Latitude, label = Event_Name), 
+                  fontface = "bold", nudge_x = c(1, -2, 2, 2, -1), 
+                  nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
+  labs(title = "Confirmed Covid-cases mapped")
 
 
