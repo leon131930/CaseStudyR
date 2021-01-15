@@ -111,6 +111,7 @@ z_krit_spear <- qt(p=0.975,df=n-1)
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
 abs(t_spear) > z_krit
 #Ergebnis: Nullhypothese kann nicht verworfen werden
+cor.test(melted_dt$avg_temp,melted_dt$daily_cases,method="spearman")
 
 
 
@@ -141,7 +142,10 @@ t_spear > z_krit
 melted_dt_without_Daegu = melted_dt[province!='Daegu']
 # Plot data: avg weather
 ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
-  geom_smooth(method = "loess")
+  geom_smooth(method = "loess") +
+  labs(x = "average temperature", y = "daily cases", 
+       title = "No correlation between avg temp & daily cases") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
 # Plot data: avg relative humidity
 ggplot(melted_dt_without_Daegu,aes(avg_relative_humidity,daily_cases,color=province))+geom_point()
 # Correlation
