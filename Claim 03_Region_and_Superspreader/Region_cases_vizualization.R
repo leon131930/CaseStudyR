@@ -32,15 +32,42 @@ ggplot(case, aes(x=longitude, y=latitude)) +
   scale_y_continuous(labels = scales::comma)+  # to show comma numbers
   labs(title = "Confirmed Covid-cases mapped")
 
+ggplot(case, aes(x=longitude, y=latitude)) +
+  geom_point(aes(size=confirmed, col="Covid Cases")) +
+  labs(title = "Confirmed Covid-cases mapped")
+
+
+
+ggplot(data = world) +
+  geom_sf(fill= "antiquewhite") +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
+  labs(title = "Confirmed Covid-cases mapped")
+
+ggplot(data = world) +
+  geom_sf(fill= "antiquewhite") +
+  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) +
+  geom_text_repel(data = spreader_event_locations, aes(x = Longitude, y = Latitude, label = Event_Name), 
+                  fontface = "bold", nudge_x = c(1, -2, 2, 2, -1), 
+                  nudge_y = c(0.5, -0.5, 0.5, 0.5, -0.5)) +
+  coord_sf(xlim = c(125.14, 130.15), ylim = c(33.02, 38.98), expand = FALSE) +
+  theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.2), panel.background = element_rect(fill = "aliceblue")) +
+  labs(title = "Confirmed Covid-cases mapped")
+
+
+
+
+
 # to add here: Map of SouthKorea -> Library to import Map Data? -> Maybe just use Region table for coordinates of cities, and display them on top?
 # Possible to increase dot size?
 
 # Loading some additional packages that we might need
-library("ggplot2")
+library(ggplot2)
 theme_set(theme_bw())
-library("sf")
-library("rnaturalearth")
-library("rnaturalearthdata")
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
 
 # Displaying world map with ggplot2
 world <- ne_countries(scale = "medium", returnclass = "sf")
@@ -106,3 +133,28 @@ spreader_event_locations
     labs(title = "Confirmed Covid-cases mapped")
   
     
+  #subsetting to remove empty values (no coordinates)
+  case <- case[longitude != "-"]
+  
+  # change data type from character to double
+  case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+  head(case)
+  
+  cases_church_related <- case_old[!(case_old$infection_case!="Shincheonji Church")]
+  library(mapproj)
+  install.packages("mapproj")
+  
+  library(raster)
+  library(ggplot2)
+  vietnam  <- getData("GADM",country="Vietnam",level=2)
+  south_korea <- getData("GADM", country="South Korea", level=2)
+  north_korea <- getData("GADM", country="North Korea", level=0)
+  
+  ggplot(south_korea,aes(x=long,y=lat,group=group))+
+    geom_polygon(aes(fill=id),color="grey30")+
+    geom_polygon(data=north_korea,fill="grey60",color="grey80")+
+    coord_map(xlim=c(-1,1)+bbox(south_korea)["x",],ylim=c(-1,1)+bbox(south_korea)["y",])+
+    scale_fill_discrete(guide="none")+
+    theme_bw()+theme(panel.grid=element_blank())
+  
+  
