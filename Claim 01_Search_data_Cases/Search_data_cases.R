@@ -71,8 +71,7 @@ ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-15")],aes(x=date)) +
 
 #same plot, but with search volume on left y axis
 ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
- # scale_x_date(date_breaks = "1 week", date_labels = "%W")+
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+ scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=(coronavirus), col = "relative search volume")) +
   geom_line(aes(y=daily_cases/8, col = "daily confirmed cases")) +
   labs(x="Calendar week 2020", title="Daily covid cases & relative search volume for 'coronavirus'")+
@@ -111,6 +110,20 @@ z_krit <- qnorm(1-alpha/2)
 abs(t) > z_krit
 
 
+# Using Cross correlation to show that search cases can indicate covid cases
+# -> Shows high correlation (0.92) for a time lag of 6 days
+
+ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily # of cases")
+ccfvalues <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, plot = FALSE)
+
+#storing ccfvalues in data table (sorted by correlation)
+cor <- ccfvalues$acf[,,1]
+lag <- ccfvalues$lag[,,1]
+dt_ccfvalues <- data.table(cor, lag)
+dt_ccfvalues <- dt_ccfvalues[order(-cor)]
+dt_ccfvalues
+
+
 #####permutation testing
 dt_permuted <- copy(merged_dt1)
 set.seed(0)
@@ -137,9 +150,6 @@ ggplot( data.table(T_permuted), aes(x = T_permuted)) +
 
 
 # -> It seems the correlation is not likely to have arisen by chance
-
-
-
 
 
 
