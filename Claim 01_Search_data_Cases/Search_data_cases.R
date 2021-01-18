@@ -88,7 +88,7 @@ ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
 
 #calculate observed correlation for date range Mid February - End of June
 merged_dt1 <- merged_dt[date %between% c("2020-02-15", "2020-06-29")]
-corr <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
+corr <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'spearman')
 corr
 
 
@@ -106,9 +106,11 @@ t
 # critical value
 alpha <- 0.05
 z_krit <- qnorm(1-alpha/2)
+z_krit
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
 abs(t) > z_krit
 
+cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="spearman")
 
 # Using Cross correlation to show that search cases can indicate covid cases
 # -> Shows high correlation (0.92) for a time lag of 6 days
@@ -147,7 +149,6 @@ for(i in 1:m){
 ggplot( data.table(T_permuted), aes(x = T_permuted)) +
   geom_histogram(bins = 40) +
   geom_vline(aes(xintercept= corr, color = "oberserved correlation"))
-
 
 # -> It seems the correlation is not likely to have arisen by chance
 
