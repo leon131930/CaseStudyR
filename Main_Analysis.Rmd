@@ -317,6 +317,7 @@ cor_CasesMeasures
 
 #Cross-correlation
 ccfValues <- ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50)
+ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, main = NA)
 ```
 
 
