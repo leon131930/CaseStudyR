@@ -9,71 +9,71 @@ library(hrbrthemes)
 library(ggpubr)
 
 ######## DATA Preparation ############
-# importing Case, PatientInfo, Searchtrend
-case <- fread("./extData/Case.csv")
+# importing PatientInfo, Searchtrend, and time table
+
 patientinfo <- fread("./extData/PatientInfo.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
+time <- fread("./extData/Time.csv")
+
+
+#check infection reasons with case table
+case <- fread("./extData/Case.csv")
+case[, .N, by=infection_case][(order(-N))]
+case[grep("Church|Christ",infection_case)][order(-confirmed)]
+
+
+############ Exploration influence of church event############
+patientinfocs <- copy(patientinfo)
+#check top infection cases
+patientinfocs[, .N, by=infection_case][(order(-N))]
+#filter for church related infection cases
+
+#patientinfocs <- patientinfocs[grep("Church|Christ",infection_case)]
+
+#comparison if only use Shincheeonji Curch data
+patientinfocs <- patientinfocs[grep("Shincheonji",infection_case)]
 
 #create new column for number of daily cases, based on count of confirmed_date
-patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
-
-#rename confirmed_date to date (otherwise not able to join)
-patientinfo[, date := sub("confirmed_date", "date", confirmed_date)]
+patientinfocs <- patientinfocs[, dailychurchcases := .N, by = confirmed_date]
+#new column/rename "confirmed_date" to "date" (otherwise not able to join)
+patientinfocs[, date := sub("confirmed_date", "date", confirmed_date)]
 #change date class to "IDate"
-patientinfo[, date:= as.IDate(date)]
+patientinfocs[, date:= as.IDate(date)]
 
-#full outer join of patientinfo and searchtrend
-search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
+#plot all church cases
+ggplot(patientinfocs[date %between% c("2020-02-18", "2020-03-10")], aes(x = date)) +
+  geom_line(aes(y=dailychurchcases))+
+  geom_point(aes(y=dailychurchcases))+
+  scale_x_date(date_breaks = "1 day", date_labels = "%d-%m")
+
+#checking dates with most church cases
+patientinfocs[order(-dailychurchcases)]%>%head(30)
+
 
 
 #set colors for visualization
-searchcolour <- "#00c7c6"
+searchcolour <- "#0000CD"
 dailycasecolour <- "#ff0000"
+churchcolour <- "#9400D3"
 
-#########Visualization with patientinfo table############
-
-# cold search volume & daily cases
-ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=cold*30, col = "Searches for 'cold'")) +
-  labs(title="Daily covid cases & search volume for 'cold'")+
-  scale_y_continuous(
-    # Features of the first axis
-    name = "daily confirmed cases",
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(trans=~./30*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
 
 #########Visualization with time table############
-
-time <- fread("./extData/Time.csv")
-time <- time[, date:= as.IDate(date, format= "%d/%m/%Y")]
+timecs <- copy(time)
+timecs <- timecs[, date:= as.IDate(date, format= "%d/%m/%Y")]
 
 #merge time table and searchtrend table, full outer join
-merged_dt <- merge(time, searchtrend, by = "date", all = TRUE)
+merged_dt <- merge(timecs, searchtrend, by = "date", all = TRUE)
+
+#merge timecs with patientinfocs, full outer join
+merged_dt2 <- merge(timecs, patientinfocs, by = "date", all = TRUE)
 
 
-#plot with 2 axis
-ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-15")],aes(x=date)) +
-  scale_x_date(date_breaks = "1 week", date_labels = "%W")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=(coronavirus)*8, col = "Searches for 'coronavirus'")) +
-  labs(x="Calendar week 2020", title="Daily covid cases & relative search volume for 'coronavirus'")+
-  scale_y_continuous(
-    name = "daily confirmed cases",
-    sec.axis = sec_axis(trans=~./8, name="relative search volume",labels = scales::comma))+
-  theme(legend.position="bottom", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-
-#same plot, but with search volume on left y axis
+#plot search and daily cases with search volume on left y axis
 ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
- scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=(coronavirus), col = "relative search volume")) +
   geom_line(aes(y=daily_cases/8, col = "daily confirmed cases")) +
+  scale_color_manual(values=c(dailycasecolour,searchcolour))+
   labs(x="Calendar week 2020", title="Daily covid cases & relative search volume for 'coronavirus'")+
   scale_y_continuous(
     name = "relative search volume",
@@ -82,17 +82,40 @@ ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = searchcolour))
 
-#explore maximum search volume data points
-#merged_dt[date %between% c("2019-12-01", "2020-05-01")][order(-coronavirus)]
 
+#plot churchcases against total daily cases 
+ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-10")],aes(x=date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%m-%d")+
+  geom_line(aes(y=daily_cases/17, col = "total daily confirmed cases")) +
+  geom_line(aes(y=(dailychurchcases), col = "daily cases from churches")) +
+  scale_color_manual(values=c(churchcolour, dailycasecolour))+
+  labs(x="Calendar week 2020", title="Daily covid cases in churches vs total")+
+  scale_y_continuous(
+    name = "daily cases from churches",
+    sec.axis = sec_axis(trans=~.*17, name="total daily confirmed cases",labels = scales::comma))+
+  theme(legend.position="bottom", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = dailycasecolour),
+        axis.title.y.left = element_text(color = churchcolour))
 
-#calculate observed correlation for date range Mid February - End of June
+#calculate observed correlation (daily cases vs churchcases) 
+merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-26")]
+
+corr <- cor(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method = 'pearson')
+corr
+
+#checking cross correlation
+ccf(merged_dt2$daily_cases,merged_dt2$dailychurchcases, na.action = na.pass)
+
+?ccf()
+merged_dt2
+
+#calculate observed correlation (daily cases vs search) for date range Mid February - End of June
 merged_dt1 <- merged_dt[date %between% c("2020-02-15", "2020-06-29")]
 corr <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'spearman')
 corr
 
 
-# Test: Correlation search volume and daily cases
+############ Test: Correlation search volume and daily cases########################
 # Nullhypothesis: No Correlation
 ho_0 <- 0
 # Na's in data?
@@ -112,12 +135,13 @@ abs(t) > z_krit
 
 cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="spearman")
 
-# Using Cross correlation to show that search cases can indicate covid cases
+################## Using Cross correlation to show that search cases can indicate covid cases######################
 # -> Shows high correlation (0.92) for a time lag of 6 days
+ccf(merged_dt1$daily_cases,merged_dt1$coronavirus)
 
 ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily # of cases")
 ccfvalues <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, plot = FALSE)
-
+ccfvalues
 #storing ccfvalues in data table (sorted by correlation)
 cor <- ccfvalues$acf[,,1]
 lag <- ccfvalues$lag[,,1]
@@ -126,7 +150,7 @@ dt_ccfvalues <- dt_ccfvalues[order(-cor)]
 dt_ccfvalues
 
 
-#####permutation testing
+#####################permutation testing#######################
 dt_permuted <- copy(merged_dt1)
 set.seed(0)
 
