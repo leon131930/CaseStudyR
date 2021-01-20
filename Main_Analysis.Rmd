@@ -23,17 +23,17 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("dplyr")
 # install.packages("ggpubr")
 # 
-# #required libraries for Claim 1
-# install.packages("patchwork")
-# install.packages("hrbrthemes")
-# 
-# #required libraries for Claim 3
+# #required libraries for Claim 2
 # install.packages("maps")
 # install.packages("ggrepel")
 # install.packages("rgeos")
 # install.packages("sf")
 # install.packages("rnaturalearth")
 # install.packages("rnaturalearthdata")
+
+# #required libraries for Claim 4
+# install.packages("patchwork")
+# install.packages("hrbrthemes")
 
 ```
 
@@ -107,10 +107,10 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
   geom_line(aes(y=`daily_cases`,color="South Korea"))+
   geom_line(aes(y=`Anzahl COVID-19-Faelle pro Tag`,color="Germany")) + 
-  labs(x= "Date", y="Daily Cases",title="Daily Cases: South Korea vs. Germany") + 
+  labs(x= "Date", y="Cases per Day",title="Daily Cases: South Korea vs. Germany") + 
   scale_color_manual(values=c( "orange", "black", "blue","red"))+
   theme(legend.position="bottom") +
-  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+  theme(legend.title=element_blank()) 
 
 ```
 
@@ -119,29 +119,30 @@ plot(plot_germany)
 ```
 
 
-* After a massive increase in daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
+* After a massive increase in the number of daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
 * The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
-* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level again. 
+* Therefore, we aim to investigate how South Korea was able to achieve these results. 
 
 
 <p>&nbsp;</p>
 
 
 ## Claim 01 
-#### Active government could reduce number of daily cases.
+#### The more active measures imposed from the government of South Korea, the lower the number of daily cases. 
 
 **Our initial motivation:**
 
+* As the number of infection cases in South Korea increased heavily, the government became more active in terms of measures with the aim to decrease the number of daily infection cases.
 
 **Claim description in more detail:**
 
-*
+* XXX
 
 **Our approach:**
 
-* We first compared the daily cases of South Korea with the ones of Germany.
-* Next we looked at the different types of government policy measures.
-* Within each type of policy we analyzed the different measures in terms of time to daily cases.
+* First, we inspect the different types of measures and wehn they were imposed from the government during the period from January 2020 to July 2020. 
+* Then, we show a specific types of measures in more detail
+* Finally, we inspect whether there is a association between the number of measurements and the development of the number of daily infection cases.
 
 <p>&nbsp;</p>
 
@@ -155,7 +156,7 @@ plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
   geom_bar(stat="identity", width = 0.7) + 
   coord_flip() +
   labs(x = "Type of Policy", y = "Number of Measures",
-       title="Different Policies of the Government")+
+       title="Different Policies")+
   theme(legend.position="none") 
 
 
@@ -169,8 +170,8 @@ plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_bar() +
   labs(x = "Time", y = "Number of Measures",
-       title="Number of introduced Measures by Start Date")+
-  theme(legend.position="none",plot.title= element_text(hjust=0.5)) +
+       title="Start of the Measures")+
+  theme(legend.position="none") +
   geom_text(aes(label=stat(count)), stat = "count", vjust = -0.5)
 
 ggarrange(plot_nbPolicies, plot_polDistribution, ncol=2, nrow=1)
@@ -248,9 +249,9 @@ ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
                 y = 240, label = "Close karaoke"),
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
-  labs(x = "Date", y = "Daily Cases",
+  labs(x = "Time", y = "Cases per Day",
        title="Administrative / Education / Social Measures")+
-  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+  theme(legend.position="none") 
 
 ```
 
@@ -301,8 +302,8 @@ ggplot(merge_CasesMeasures, aes(x = date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_line(aes(y=`daily_cases`, col = "Daily Cases")) +
   geom_line(aes(y=`cumulativeNumbers` * 8,col = "Cum. Measures")) + 
-  labs(title="Daily Cases and Number of Measures") +
-  scale_y_continuous(name = "Daily Cases",
+  labs(title="Daily Cases and Number of Measures", x = "Time") +
+  scale_y_continuous(name = "Cases per Day",
   # Add a second axis, with a scale / 8
   sec.axis = sec_axis(~./ 8, name="Number of cum. Measures")) +
   theme(legend.position="right", legend.title = element_blank(), 
@@ -316,19 +317,22 @@ cor_CasesMeasures
 
 #Cross-correlation
 ccfValues <- ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50)
+```
 
-#Interpretation
-"
-ccf(x,y)
-x = number of measures at time xt+h with h = -30
-y = daily cases at time yt
 
-The correlations in this region are negative, indicating that an above 
+
+**Interpretation:**
+
+* The correlations in this region are negative, indicating that an above 
 average value of measures is likely to lead to a below average value of daily cases 
 about 30 days later. 
-And, a below average of measures is associated with a likely above average daily cases
-value about 6 months later.
-"
+* And, a below average of measures is associated with a likely above average daily cases value about 6 months later.
+
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+
 
 #Test - Statistics
 test <-cor.test(merge_CasesMeasures$cumulativeNumbers, 
@@ -337,11 +341,6 @@ test
 
 p_value <- test$p.value
 p_value
-
-
-
-
-
 
 ```
 
@@ -402,7 +401,8 @@ total_cases_patientinfo <- ggplot(data = patientinfo, aes(x=confirmed_date, y=da
 #total cases in Korea per day
 time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time[, confirmed_date:= as.IDate(confirmed_date)]
-total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line()
+total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+  labs(x="Time", y="Cases per Day")
 
 # Putting both graphs next to each other to show patientinfo is a sample of time
 
@@ -554,8 +554,8 @@ melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 # Plot data: avg weather
 ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "remaining provinces")))+geom_point() +
   labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation between avg. Temperature & Daily Cases (all provinces)") +
-  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+       title = "Relation: Avg. Temperature vs. Daily Cases (all provinces)") +
+  theme(legend.title=element_blank()) 
 
 ```
 
@@ -576,8 +576,8 @@ melted_dt_without_Daegu = melted_dt[province!='Daegu']
 ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
   geom_smooth(method = "loess") +
   labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation between avg. Temperature & Daily Cases (without Daegu)") +
-  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+       title = "Relation: Avg. Temperature vs. Daily Cases (without Daegu)") +
+  theme(legend.title=element_blank()) 
 
 
 ```
@@ -599,6 +599,8 @@ p_value
 
 
 ```
+
+**Interpretation:**
 
 The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
 As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
@@ -651,8 +653,8 @@ ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) 
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
   geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
-  labs(title="Daily covid cases & search volume for 'coronavirus'")+
-  scale_y_continuous(name = "daily confirmed cases",
+  labs(title="Daily Covid Cases & Search Volume for 'coronavirus'", x = "Time")+
+  scale_y_continuous(name = "Cases per Day",
     # Add a second axis, with a scale *10k 
   sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
@@ -670,9 +672,9 @@ ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) 
   scale_x_date(date_breaks = "2 month", date_labels = "%b %y")+
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
   geom_line(aes(y=flu*100, col = "Searches for 'flu'")) +
-  labs(title="Daily covid cases & search volume for 'flu'")+
+  labs(title="Daily Covid Cases & Search Volume for 'flu'", x = "Time")+
   scale_y_continuous(
-    name = "daily confirmed cases",
+    name = "Cases per Day",
     # Add a second axis, with a scale *10k 
     sec.axis = sec_axis(trans=~./100*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
@@ -693,10 +695,10 @@ ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) 
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=daily_cases, col = "Daily Cases")) +
   geom_line(aes(y=cold*30, col = "Searches for 'cold'")) +
-  labs(title="Daily covid cases & search volume for 'cold'")+
+  labs(title="Daily Covid Cases & Search Volume for 'cold'", x = "Time")+
   scale_y_continuous(
     # Features of the first axis
-    name = "daily confirmed cases",
+    name = "Cases per Day",
     # Add a second axis and specify its features
     sec.axis = sec_axis(trans=~./30*10000, name="Search Volume"))+
   theme(legend.position="right", legend.title = element_blank(), 
