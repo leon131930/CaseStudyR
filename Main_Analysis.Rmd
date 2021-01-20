@@ -37,9 +37,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-
-
-
 ```{r echo = TRUE, message=FALSE}
 
 #general libraries
@@ -72,6 +69,8 @@ patientinfo <- fread("./extData/PatientInfo.csv")
 case <- fread("./extData/Case.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
 region <- fread("./extData/Region.csv")
+weather <- fread("./extData/Weather.csv")
+timeProvince <- fread("./extData/TimeProvince.csv")
 
 ```
 
@@ -83,134 +82,8 @@ options(warn=-1)
 ```
 <p>&nbsp;</p>
 
-## Claim 01
-#### Search Data Cases.
 
-**Our initial motivation:**
-
-* We assume that the coronavirus had been spreading several months before cases were officially reported. To support our claim, we use available search data.
-
-**Claim description in more detail:**
-
-* The number of searches for covid-related symptoms shows an increase in the beginning of the pandemic (Beginning of 2020)
-* The number of daily confirmed cases correlates with the searches for covid-related symptoms
-
-**Our approach:**
-
-We join the tables patientInfo and Searchtrend by confirmed_date.
-Then, we plot the number of daily cases and searches as line chart.
-As the search data is not comparable with the daily confirmed cases on the same scale, we introduce
-an additional y-Axis for the search data.
-As the data for the search volume contains many values below 0.0001, we multiply the scale for the data with 10.000.
-
-<p>&nbsp;</p>
-
-```{r echo=FALSE, message=FALSE}
-
-#create new column for number of daily cases, based on count of confirmed_date
-patientinfo <- patientinfo[, daily_cases := .N, by = confirmed_date]
-
-
-#rename confirmed_date to date (otherwise not able to join)
-patientinfo[, date := sub("confirmed_date", "date", confirmed_date)]
-#change date class to "IDate"
-patientinfo[, date:= as.IDate(date)]
-
-#full outer join of patientinfo and searchtrend
-search_patient <- merge(patientinfo, searchtrend, by = "date", all = TRUE)
-
-#set colour for visualization
-searchcolour <- "#00c7c6"
-dailycasecolour <- "#ff0000"
-
-# coronavirus search volume & daily cases
-ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
-  labs(title="Daily covid cases & search volume for 'coronavirus'")+
-  scale_y_continuous(name = "daily confirmed cases",
-    # Add a second axis, with a scale *10k 
-  sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-
-```
-
-<p>&nbsp;</p>
-
-```{r echo=FALSE, message=FALSE}
-  
-# flu search volume & daily cases
-ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "2 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=flu*100, col = "Searches for 'flu'")) +
-  labs(title="Daily covid cases & search volume for 'flu'")+
-  scale_y_continuous(
-    name = "daily confirmed cases",
-    # Add a second axis, with a scale *10k 
-    sec.axis = sec_axis(trans=~./100*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-```
-
-<p>&nbsp;</p>
-
-```{r echo=FALSE, message=FALSE}
-
-# cold search volume & daily cases
-#setting colour
-searchcolour <- "#00c7c6"
-dailycasecolour <- "#ff0000"
-
-ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=cold*30, col = "Searches for 'cold'")) +
-  labs(title="Daily covid cases & search volume for 'cold'")+
-  scale_y_continuous(
-    # Features of the first axis
-    name = "daily confirmed cases",
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(trans=~./30*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-
-```
-
-**Short Analysis**
-
-* The term "coronavirus" was searched many times more often in comparison to the other two available search terms "flu" and "cold".
-* Both the search term "coronavirus" and "cold" show partial similarity in its course with the daily confirmed cases (e.g. strong increase in mid-February).
-* The gradual increase of the search term "flu" starting in October 2019 could be an indicator of the first (not-tested) covid cases. But there is further investigation needed to differentiate the data from the annual flu-season.
-
-<p>&nbsp;</p>
-
-## Claim 02 
-#### Strict lockdown measures have prevented a thorough spread in South Korea.
-
-**Our initial motivation:**
-
-* After a massive increase in daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
-
-
-**Claim description in more detail:**
-
-* Stricter lockdown measures lead to a lower outbreak of the Covid-19 Virus. 
-* Compared to other countries, for example Germany, the government of South Korea reacted more effectively and efficiently. 
-
-
-**Our approach:**
-
-* We first compared the daily cases of South Korea with the ones of Germany.
-* Next we looked at the different types of government policy measures.
-* Within each type of policy we analyzed the different measures in terms of time to daily cases.
-
-<p>&nbsp;</p>
+## Initial Motivation
 
 ```{r echo=FALSE, message=FALSE, include=FALSE, message=FALSE}
 #total cases in Korea per day
@@ -234,11 +107,7 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
   geom_line(aes(y=`daily_cases`,color="South Korea"))+
   geom_line(aes(y=`Anzahl COVID-19-Faelle pro Tag`,color="Germany")) + 
-  labs(x= "Date", y="Daily Cases",title="Daily Cases: South Korea vs. Germany")+
-  geom_rect(aes(xmin=as.Date('2020-02-26'),xmax=as.Date('2020-03-15'),
-                ymin=860,ymax=890,color="18 days"))+
-  geom_rect(aes(xmin=as.Date('2020-03-10'),xmax=as.Date('2020-05-10'),
-                ymin=6400,ymax=6430,color="61 days"))+
+  labs(x= "Date", y="Daily Cases",title="Daily Cases: South Korea vs. Germany") + 
   scale_color_manual(values=c( "orange", "black", "blue","red"))+
   theme(legend.position="bottom") +
   theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
@@ -249,45 +118,62 @@ plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) +
 plot(plot_germany)
 ```
 
-**Short Analysis**
 
+* After a massive increase in daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
 * The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
-* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level again.  
+* Compared to Germany, it seems that South Korea needed less time to reduce and control the number of daily cases after the first outbreak of the virus. It took Germany about three times as long as South Korea to get the number of daily cases to a low level again. 
+
 
 <p>&nbsp;</p>
 
+
+## Claim 01 
+#### Active government could reduce number of daily cases.
+
+**Our initial motivation:**
+
+
+**Claim description in more detail:**
+
+*
+
+**Our approach:**
+
+* We first compared the daily cases of South Korea with the ones of Germany.
+* Next we looked at the different types of government policy measures.
+* Within each type of policy we analyzed the different measures in terms of time to daily cases.
+
+<p>&nbsp;</p>
+
+
 ```{r echo = FALSE, message=FALSE}
 
-nbPolicies <- policy1[, .N, by=type] %>% setorder(., -N) 
-
+policy_copy = copy(policy)
+nbPolicies <- policy_copy[, .N, by=type] %>% setorder(., -N) 
 
 plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
   geom_bar(stat="identity", width = 0.7) + 
   coord_flip() +
   labs(x = "Type of Policy", y = "Number of Measures",
-       title="Policies of the Government")+
-  theme(legend.position="none",plot.title= element_text(hjust=0.5)) 
+       title="Different Policies of the Government")+
+  theme(legend.position="none") 
 
 
 #Policy Starting Day Distribution
-
-policyDay = policy1[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
+policy_copy = copy(policy)
+policyDay = policy_copy[, c("policy_id", "country", "type", "detail", "end_date") := NULL]
 
 policyDay <- policyDay[, count := .N, by=start_date]
 
 plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
-  geom_dotplot(dotsize = 2) +
-  
-  labs(x = "Start date", y = "Number of Measures",
-       title="Number of introduced Measures")+
-  theme(legend.position="none",plot.title= element_text(hjust=0.5), 
-        axis.text.y = element_blank())
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
+  geom_bar() +
+  labs(x = "Time", y = "Number of Measures",
+       title="Number of introduced Measures by Start Date")+
+  theme(legend.position="none",plot.title= element_text(hjust=0.5)) +
+  geom_text(aes(label=stat(count)), stat = "count", vjust = -0.5)
 
-
-
-#put plots together
-
-ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
+ggarrange(plot_nbPolicies, plot_polDistribution, ncol=2, nrow=1)
 
 ```
 
@@ -297,95 +183,14 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol = 2, nrow = 1)
 
 * Shortly after the number of infection cases surged the government of South Korea reacted with numerous measures in all kind of area. The many measures in the middle of April are related to the Online-school opening measures that all took place at once for each type of school. 
 
-<p>&nbsp;</p>
-
-```{r echo=FALSE, message=FALSE}
-
-#total number of infection cases due to immigration
-contact_overseas <- patientinfo[infection_case == "overseas inflow", 
-                                 .N, by = "confirmed_date"]
-
-#get subsets only for 3 different immigration policies 
-#IP_Special, IP_14Day, IP_ManTest
-immigration_policy <- policy[type == "Immigration"]
-
-IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
-IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
-IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
-
-
-#1. Run plot and safe it in overseas_plot
-#2. Go to file "Lockdown_immigration" and run the code at the very end to get
-#the figure
-
-
-overseas_plot <- ggplot(contact_overseas, aes(x=confirmed_date, y=N)) + geom_line() +
-  geom_vline(data = IP_Special, aes(xintercept = start_date, 
-                                    color = "Immigration\nprocedure"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
-                                  color = "Self\nquarantine"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
-                                    color = "Diagnostic\nTest US"), 
-             linetype = "longdash", show.legend = TRUE) +
-  labs(x = "Date", y = "Daily Cases (overseas inflows)") +
-  theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
-
-```
-
-```{r echo=FALSE, message=FALSE}
-#total cases in Korea per day
-time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-
-
-
-immigration_policy <- policy[type == "Immigration"]
-
-IP_Special <- immigration_policy[gov_policy == "Special Immigration Procedure"]
-IP_14Day <- immigration_policy[gov_policy == "Mandatory 14-day Self-Quarantine"]
-IP_ManTest <- immigration_policy[gov_policy == "Mandatory Self-Quarantine & Diagonostic Tests"]
-
-immigration_plot <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
-  
-  geom_vline(data = IP_Special, aes(xintercept = start_date, 
-                               color = "Immigration\nprocedure"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_14Day, aes(xintercept = start_date, 
-                                       color = "Self\nquarantine"), 
-             linetype = "longdash", show.legend = TRUE)+
-  geom_vline(data = IP_ManTest, aes(xintercept = start_date, 
-                                 color = "Diagnostic\nTest US"), 
-             linetype = "longdash", show.legend = TRUE)  +
-  labs(x = "Date", y = "Daily Cases") + 
-  theme(legend.position="bottom") +
-  theme(legend.title=element_blank()) 
-```
-
-```{r echo=FALSE, message=FALSE}
-#1. Run plot in file: Lockdown_overseas
-#2. Run plot in Lockdown_immigration (current file)
-#Execute code below to get both plots next to each other
-plot_immigration <- ggarrange(immigration_plot, overseas_plot,
-          ncol = 2, nrow = 1)
-annotate_figure(plot_immigration,
-                top = text_grob("International measures", 
-                                color = "black", size = 14))
-
-```
-
-**Short Analysis**
-
-* After experiencing a peak in numbers, the government of South Korea established special immigration procedures for foreign countries in order to prevent another severe increase in numbers caused by people entering the country. However, one can note that shortly afterwards the number of daily cases related to overseas inflow first increased before plunging afterwards. 
-* After the number of daily cases related to overseas inflow reached a very high level, the government of South Korea imposed a mandatory 14-day Self-Quarantine. It seems that after a short time the number of daily cases related to overseas inflow could be reduced sharply and retained a relatively stable level.
  
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
+time_copy = copy(time)
 #total cases in Korea per day
-time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-time[, confirmed_date:= as.IDate(confirmed_date)]
+time_copy[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time_copy[, confirmed_date:= as.IDate(confirmed_date)]
 
 
 #extract education measures from table policy
@@ -397,7 +202,7 @@ date_education <- policy[type == "Education"]
 #social policies
 #on infection cases per day within the time frame 
 
-ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
+ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   
   #education policies
   
@@ -456,7 +261,93 @@ ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 <p>&nbsp;</p>
 
-## Claim 03
+
+```{r echo=FALSE, message=FALSE}
+
+# Policies: cumulative Measures per Day
+policy_copy <- copy(policy) 
+
+policy_day_start <- policy_copy[,.(start_date)]  %>% .[,.N,by = "start_date"]
+colnames(policy_day_start) <- c("date","number")
+
+policy_day_end <- policy_copy[,.(end_date)] %>% .[,.N,by = "end_date"]
+colnames(policy_day_end) <- c("date","number")
+policy_day_end <- na.omit(policy_day_end, "date")
+
+#Merge data and only retain the relevant ones and replace NAs with 0
+merge_StartEnd <- merge(x = policy_day_start, y = policy_day_end, by = "date", all = TRUE)
+colnames(merge_StartEnd) <- c("date","newMeasures","stoppedMeasures")
+merge_StartEnd[is.na(merge_StartEnd)] <- 0
+
+#get difference between policies that started and ended at a certain day
+merge_StartEnd[, difference := .(newMeasures - stoppedMeasures)]
+
+#Including daily number of infection cases from table "time"
+time_copy = copy(time)
+time_copy[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time_copy[, confirmed_date:= as.IDate(confirmed_date)]
+time <- time[,.(confirmed_date, daily_cases)]
+colnames(time) <- c("date", "daily_cases")
+
+#merge number of cum. measures and daily cases
+merge_CasesMeasures <- 
+  merge(x = time, y = merge_StartEnd, by = "date", all.x = TRUE)
+merge_CasesMeasures[is.na(merge_CasesMeasures)] <- 0
+
+merge_CasesMeasures[, cumulativeNumbers := cumsum(difference)]
+
+# Plot "daily cases" and "cum. number of measures" on two different y axis
+ggplot(merge_CasesMeasures, aes(x = date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
+  geom_line(aes(y=`daily_cases`, col = "Daily Cases")) +
+  geom_line(aes(y=`cumulativeNumbers` * 8,col = "Cum. Measures")) + 
+  labs(title="Daily Cases and Number of Measures") +
+  scale_y_continuous(name = "Daily Cases",
+  # Add a second axis, with a scale / 8
+  sec.axis = sec_axis(~./ 8, name="Number of cum. Measures")) +
+  theme(legend.position="right", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90))
+
+
+#Calculate statistics
+#Correlation 
+cor_CasesMeasures <- cor(merge_CasesMeasures$cumulativeNumbers, merge_CasesMeasures$daily_cases, method = 'spearman')
+cor_CasesMeasures
+
+#Cross-correlation
+ccfValues <- ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50)
+
+#Interpretation
+"
+ccf(x,y)
+x = number of measures at time xt+h with h = -30
+y = daily cases at time yt
+
+The correlations in this region are negative, indicating that an above 
+average value of measures is likely to lead to a below average value of daily cases 
+about 30 days later. 
+And, a below average of measures is associated with a likely above average daily cases
+value about 6 months later.
+"
+
+#Test - Statistics
+test <-cor.test(merge_CasesMeasures$cumulativeNumbers, 
+                merge_CasesMeasures$daily_cases,method="spearman")
+test
+
+p_value <- test$p.value
+p_value
+
+
+
+
+
+
+```
+
+<p>&nbsp;</p>
+
+## Claim 02
 #### Superspreader Events were the reason the Covid cases in South Korea turned out to be so intense in the first place.
 
 **Our initial motivation:**
@@ -588,9 +479,6 @@ case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 ```
 
 
-
-
-
 ```{r echo=FALSE, message=FALSE}
 # Looking up exact locations of the main spreader events and adding a data frame with the exact longitude and latitude of every event
 
@@ -624,3 +512,204 @@ spreader_event_locations <- data.frame(Event_Name = c("Shincheonji Church", "Ita
 * One can clearly see the connection between large outbreak locations and the spreader events. While multiple cases and events occurred in Seoul (North-West part of South Korea), the most interesting thing is the very first spreader event in Daegu (Shincheonji Church).
 * Interesting is as well, that his map shows not only part of the acutal cases (such as the Patientinfo table) but a real overview of the number of cases occurred in the different areas.
 * Thus, one can clearly see the influence the main first spreader event in the Shincheonji Church in Daegu had. One could argue that without the event the cases might have been seriously lower. However, further analysis would have had to be conducted in order to confirm this. 
+
+<p>&nbsp;</p>
+
+
+## Claim 03
+#### The average temperature level correlates with daily number of infection cases.
+
+**Our initial motivation:**
+
+* Concerning other viruses it is often said that the temperature level has an significant impact on the daily number of infection cases.
+So it is reasonable to inspect whether this is also true for COVID-19.
+
+**Claim description in more detail:**
+
+* Therefore, we analyze the relation between the temperature level and daily infection cases within the period from January to June in 2020. Depending on the results, it might be possible to gain insights for further actions to reduce the number of infection cases.
+
+**Our approach:**
+
+* First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that average temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
+Ho : r = 0. Furthermore, we use the commonly used significance level of alpha = 0.05. Therefore, we will reject Ho if the p-value is below 0.05.
+
+
+<p>&nbsp;</p>
+
+
+```{r echo=FALSE, message=FALSE}
+#As date
+weather[, date:= as.IDate(date)]
+timeProvince[,date:=as.Date(date,"%d/%m/%y")]
+timeProvince[, date:= as.IDate(date)]
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+# Combine tables
+# Province Sejong is missing in table Weather -> not all confirmed cases can be found in melted_dt
+melted_dt <- merge(weather,timeProvince,by=c('province','date'))
+
+# Plot data: avg weather
+ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "remaining provinces")))+geom_point() +
+  labs(x = "Average Temperature", y = "Cases per Day", 
+       title = "Relation between avg. Temperature & Daily Cases (all provinces)") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+
+```
+
+<p>&nbsp;</p>
+
+As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot whicht is a typical characteristic for an outlier. Therefore, it is seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer the Spearman correlation test.
+
+
+<p>&nbsp;</p>
+
+
+```{r echo=FALSE, message=FALSE}
+
+# Data without province Daegu (Shincheonji church is located there -> Superspreader Event)
+# Prepare data
+melted_dt_without_Daegu = melted_dt[province!='Daegu']
+# Plot data: avg weather
+ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
+  geom_smooth(method = "loess") +
+  labs(x = "Average Temperature", y = "Cases per Day", 
+       title = "Relation between avg. Temperature & Daily Cases (without Daegu)") +
+  theme(legend.title=element_blank(),plot.title=element_text(hjust=0.5)) 
+
+
+```
+
+<p>&nbsp;</p>
+
+Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the to variables can be seen.
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+cor_temp_spear <- cor(melted_dt$avg_temp, melted_dt$daily_cases, method = 'spearman')
+
+test <-cor.test(melted_dt$avg_temp,melted_dt$daily_cases,method="spearman")
+test
+
+p_value <- test$p.value
+p_value
+
+
+```
+
+The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
+As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
+
+<p>&nbsp;</p>
+
+## Claim 04
+#### Search Data Cases.
+
+**Our initial motivation:**
+
+* We assume that the coronavirus had been spreading several months before cases were officially reported. To support our claim, we use available search data.
+
+**Claim description in more detail:**
+
+* The number of searches for covid-related symptoms shows an increase in the beginning of the pandemic (Beginning of 2020)
+* The number of daily confirmed cases correlates with the searches for covid-related symptoms
+
+**Our approach:**
+
+We join the tables patientInfo and Searchtrend by confirmed_date.
+Then, we plot the number of daily cases and searches as line chart.
+As the search data is not comparable with the daily confirmed cases on the same scale, we introduce
+an additional y-Axis for the search data.
+As the data for the search volume contains many values below 0.0001, we multiply the scale for the data with 10.000.
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+
+#create new column for number of daily cases, based on count of confirmed_date
+patientinfo_copy = copy(patientinfo)
+patientinfo_copy <- patientinfo_copy[, daily_cases := .N, by = confirmed_date]
+
+
+#rename confirmed_date to date (otherwise not able to join)
+patientinfo_copy[, date := sub("confirmed_date", "date", confirmed_date)]
+#change date class to "IDate"
+patientinfo_copy[, date:= as.IDate(date)]
+
+#full outer join of patientinfo and searchtrend
+search_patient <- merge(patientinfo_copy, searchtrend, by = "date", all = TRUE)
+
+#set colour for visualization
+searchcolour <- "#00c7c6"
+dailycasecolour <- "#ff0000"
+
+# coronavirus search volume & daily cases
+ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
+  geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
+  labs(title="Daily covid cases & search volume for 'coronavirus'")+
+  scale_y_continuous(name = "daily confirmed cases",
+    # Add a second axis, with a scale *10k 
+  sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
+  theme(legend.position="right", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = searchcolour),
+        axis.title.y.left = element_text(color = dailycasecolour))
+
+```
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+  
+# flu search volume & daily cases
+ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) +
+  scale_x_date(date_breaks = "2 month", date_labels = "%b %y")+
+  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
+  geom_line(aes(y=flu*100, col = "Searches for 'flu'")) +
+  labs(title="Daily covid cases & search volume for 'flu'")+
+  scale_y_continuous(
+    name = "daily confirmed cases",
+    # Add a second axis, with a scale *10k 
+    sec.axis = sec_axis(trans=~./100*10000, name="Search Volume"))+
+  theme(legend.position="right", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = searchcolour),
+        axis.title.y.left = element_text(color = dailycasecolour))
+```
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+
+# cold search volume & daily cases
+#setting colour
+searchcolour <- "#00c7c6"
+dailycasecolour <- "#ff0000"
+
+ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
+  geom_line(aes(y=cold*30, col = "Searches for 'cold'")) +
+  labs(title="Daily covid cases & search volume for 'cold'")+
+  scale_y_continuous(
+    # Features of the first axis
+    name = "daily confirmed cases",
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans=~./30*10000, name="Search Volume"))+
+  theme(legend.position="right", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = searchcolour),
+        axis.title.y.left = element_text(color = dailycasecolour))
+
+```
+
+**Short Analysis**
+
+* The term "coronavirus" was searched many times more often in comparison to the other two available search terms "flu" and "cold".
+* Both the search term "coronavirus" and "cold" show partial similarity in its course with the daily confirmed cases (e.g. strong increase in mid-February).
+* The gradual increase of the search term "flu" starting in October 2019 could be an indicator of the first (not-tested) covid cases. But there is further investigation needed to differentiate the data from the annual flu-season.
+
+
+
