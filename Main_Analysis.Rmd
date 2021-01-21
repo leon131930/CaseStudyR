@@ -775,32 +775,28 @@ As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstan
 <p>&nbsp;</p>
 
 ## Claim 04
-#### Connection of Search Data and Daily Cases
+#### Search data is related to the development of daily cases, thus could function as predictor for future outbreaks
 
 **Our initial motivation:**
 
-* We assume that the coronavirus had been spreading several months before cases were officially reported. To support our claim, we use available search data.
+* Previous results showed that identifying covid outbreaks quickly is important to react appropriately, e.g. with social-distancing measures.
+It might thus be interesting to investigate factors which can possibly predict future covid outbreaks.
+
 
 **Claim description in more detail:**
 
-* The number of searches for covid-related symptoms shows an increase in the beginning of the pandemic (Beginning of 2020)
-* The number of daily confirmed cases correlates with the searches for covid-related symptoms
+* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after the onset of symptoms. It should thus be explored whether search data is linked to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
 
 **Our approach:**
 
-We join the tables patientInfo and Searchtrend by confirmed_date.
-Then, we plot the number of daily cases and searches as line chart.
-As the search data is not comparable with the daily confirmed cases on the same scale, we introduce
-an additional y-Axis for the search data.
-As the data for the search volume contains many values below 0.0001, we multiply the scale for the data with 10.000.
+* To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus". As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
+As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
+After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases. Finally we apply the pearson tests for correlation to reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
 
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
-# importing PatientInfo, Searchtrend, and time table
-patientinfo <- fread("./extData/PatientInfo.csv")
-searchtrend <- fread("./extData/SearchTrend.csv")
-time <- fread("./extData/Time.csv")
+
 
 
 #***Data preparation Time table:***
