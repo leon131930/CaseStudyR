@@ -69,7 +69,7 @@ class(sk_region.shp.f$id)
 # Rename column name in cases_church_sm so we can merge both dataframes
 cases_church_sm <- cases_church_sm %>% rename(id = province)
 
-# Merging both dataframes
+# Merging both dataframes - doing an inner join here, maybe outer join better? 
 merge.south_korea_zwei <- merge(south_korea.f, cases_church_sm, by = "id")
 head(merge.south_korea_zwei)
 

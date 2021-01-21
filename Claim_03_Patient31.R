@@ -325,10 +325,73 @@ ggplot() +
 
 
 
+###DISCLAIMER###
+# Disclaimer: we will now use the patientinfo data table because in this datatable we have information for both, the
+# number of daily cases as well as the infection reason for those cases. Unfortunately we don't have an infection
+# reason within the time datatable. We are not able to merge both tables because the time table provice cumulated 
+# information. Since the time datatable includes a lot more daily cases than the patientinfo
+# datatable we will first have a look, whether the patientinfo dataset can be seen as a subset of the time dataset.
+
+##TALK ABOUT THIS WITH THE OTHERS!
+#Let's see whether it makes more sense to put both graph lines into one graph - we should talk about this!
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") +
+  geom_line(data = time_02, colour="green") +
+  labs(x="Time", y="Cases per Day")
+
+# Graph showing total daily cases over time, patientinfo database
+patientinfo_02[, daily_cases := .N, by = confirmed_date]
+total_cases_patientinfo <- ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) +
+  geom_line(colour="black") + labs(x="Time", y="Cases per Day")
+total_cases_patientinfo
+
+# Graph showing total daily cases over time, time database, total cases in Korea per day
+time_02[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time_02[, confirmed_date:= as.IDate(confirmed_date)]
+total_cases_time <- ggplot(time_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black")+
+  labs(x="Time", y="Cases per Day")
+total_cases_time
+
+#Let's put both graphs next to each other
+library(ggpubr)
+ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
+
+# Due to the quite similar progression of the two graphs, we will assume that we can treat
+# patientinfo as a valid, representable subset of the time datatable
+###DISCLAIMER END###
 
 
 
 
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(aes(colour="black")) +
+  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), 
+            aes(colour = "red")) +
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
+  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Church related Cases")) +
+  theme(legend.position="bottom", legend.title = element_blank())
+
+
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(aes(colour="black")) +
+  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), 
+            aes(colour = "red")) +
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
+  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Church related Cases")) +
+  theme(legend.position="bottom", legend.title = element_blank())
+######
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(aes(colour="black")) +
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
+  theme(legend.position="bottom", legend.title = element_blank())
+
+
+
+
+
+
+
+# Merge patientinfo_02 and patientinfo_02_church (in order to get daily cases & chruch daily cases)
+merged_daily_churchcases <- merge(patientinfo_02, patientinfo_02_church, by = "confirmed_date")
+
+merged_dt2 <- merge(timecs, patientinfocs, by = "date", all = TRUE)
 
 
 
@@ -539,3 +602,48 @@ test_only_relevant_regions <- test_only_relevant_regions[!(test_only_relevant_re
 test_only_relevant_regions <- test_only_relevant_regions[!(test_only_relevant_regions$province=="Chungcheongnam-do")]
 
 
+
+
+
+
+
+
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
+  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), colour = "red") +
+  geom_vline(data = super_spreader_church,
+             aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020) - acc. to NY Times")) +
+  geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
+             aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020")) +
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
+  theme(legend.position="bottom",legend.direction="vertical", legend.title = element_blank())
+
+
+
+# Plotting Daily Cases related to the Church together with overall Daily Cases
+
+# Calculate the daily cases (overall) and add as column
+patientinfo_02[, daily_cases := .N, by = confirmed_date]
+
+# Create new table for church cases only
+patientinfo_02_church <- patientinfo_02[grep("Shincheonji",infection_case)]
+# Add column for daily church cases
+patientinfo_02_church <- patientinfo_02_church[, dailychurchcases := .N, by = confirmed_date]
+
+# Plotting both over time
+ggplot() + geom_line(data = patientinfo_02,
+                     aes(x=confirmed_date, y=daily_cases, colour="black")) +
+  geom_line(data = patientinfo_02_church, 
+            aes(x=confirmed_date, y= dailychurchcases, colour = "red")) +
+  labs(x="Time", y="Cases per Day", title = "Shincheonji vs. Overall Daily Cases over Time") +
+  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Shincheonji Church related Cases")) +
+  theme(legend.position="bottom", legend.title = element_blank())
+
+# Although the daily church related cases seem to make up only a small part of the overall daily cases
+# in terms of time it still fits pretty well to the beginning of the first larger outbreak. Let's dive
+# a bit deeper into this.
+
+
+
+# But how can this one event or this one person be responsible for the outbreak in a whole country?
+# Like obviously 1160 contacts is HUGE, but if this happens in one city it doesn't necessarily mean
+# that the whole outbreak was caused by this one event, does it?
