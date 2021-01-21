@@ -217,26 +217,71 @@ sum(patientinfo_02$infected_by=="1200000031")
 # people where tested positive at, I am able to show you how many people were tested positive
 # in regions that were not Daego but still related to the virus
 # SHOW SIMPLE GRAPH HOW MANY PEOPLE TURNED UP IN OTHER REGIONS
+church_cases_around_SK <- case_02%>% filter(infection_case=="Shincheonji Church")
+#loose the ID column 
+church_cases_around_SK <- subset(church_cases_around_SK, select = -c(case_id))
+
+# Loose the row with the church itself
+church_cases_outside_daegu <- church_cases_around_SK[!(church_cases_around_SK$province=="Daegu"),]
+
+# Now plot an overview of these cases
+# Look for a cool red color with grep("red", colors(), value=T)
+ggplot(data = church_cases_outside_daegu,
+       aes(x=confirmed,
+           y=reorder(province,confirmed))) +
+  geom_bar(stat="identity", width = 0.7, fill = "mediumvioletred") +
+  geom_text(aes(label=confirmed), hjust=-.1, color="black", size=3) +
+  labs(x="Number of Cases", y="Region", 
+       title = "Shincheonji Church related Cases OUTSIDE of Daegu")
+
+# Create a table where region and city are the same in order to get coordinates for regions
+test <- region_02%>% filter(province==city)
+
+# Now loose all the columns that we don't need
+test <- subset(test, select = -c(code, elementary_school_count, kindergarten_count, university_count, academy_ratio, elderly_population_ratio, elderly_alone_ratio, nursing_home_count))
+test_without_city <- subset(test, select = -c(city))
+church_cases_around_SK
+
+# Loose the rows we don't have covid cases for
+test_only_relevant_regions <- test_without_city[!(test_without_city$province=="Jeju-do")]
+test_only_relevant_regions <- test_only_relevant_regions[!(test_only_relevant_regions$province=="Korea")]
+test_only_relevant_regions <- test_only_relevant_regions[!(test_only_relevant_regions$province=="Chungcheongnam-do")]
+
+# Loose the columns we don't need in the church_cases table to prep for full join
+church_cases_for_join <- subset(church_cases_around_SK, select = -c(city, group, infection_case, longitude, latitude))
+
+# I don't think I had to delete those rows above because I can do an inner join. Let's try this
+plotting_table <- merge(test_without_city, church_cases_for_join, by = "province")
+plotting_table
+
+# Change data type to double
+plotting_table[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+
+# Plotting the graph for the first time
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases related to the Church")) + 
+  coord_map() + labs(title = "Church-Cases spread over South Korea")
+
+# Doing that again but withouht Daegu bc it fucks up the point sizes
+plotting_table_witout_daegu <- plotting_table[!(plotting_table$province=="Daegu")]
+
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table_witout_daegu, aes(x=longitude, y=latitude, 
+                                                     size = confirmed),
+             color = "darkred",
+             alpha = 0.7,) +
+  scale_size_continuous(range = c(3, 7)) +
+  geom_text_repel(data = locations_seoul_church, 
+                  aes(x = Longitude, y = Latitude, label = Location), 
+                  fontface = "bold", nudge_x = c(0.1, -2), 
+                  nudge_y = c(0.4, -0.4)) +
+  coord_map() + labs(title = "Church-related-Cases spread over South Korea (excl. Daegu)")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  colors_claim02 <- c("Shinchoenji Church related" = "red", 
-                      "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020)" = "red",
-                      "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020" = "blue")
 
 
 
@@ -244,6 +289,150 @@ sum(patientinfo_02$infected_by=="1200000031")
 # at that church event that simply wasn't tested positive or didn't get tested at all. So it is
 # not really possible to "blame" all on this one women in her 60s.
 ###############################
+
+
+
+
+
+
+
+# Doing it a third time splitting the Church location and the other locations in different colors
+# TAKE CARE OF LEGEND! STILL LOOKS AWEFUL
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table_witout_daegu, aes(x=longitude, y=latitude, 
+                                                     size = confirmed),
+             color = "darkred",
+             alpha = 0.7,
+             show.legend = TRUE) + 
+  scale_size_continuous(range = c(3, 7)) +
+  geom_point(data = subset(plotting_table, province=="Daegu"), aes(x=longitude, y=latitude, 
+                                                                   size = confirmed),
+             color = "red",
+             alpha = 0.5,
+             show.legend = FALSE) +
+  geom_text_repel(data = subset(locations_seoul_church, Location=="Shincheonji Church"), 
+                  aes(x = Longitude, y = Latitude, label = Location), 
+                  fontface = "bold", nudge_x = c(1, -2), 
+                  nudge_y = c(0.4, -0.5)) +
+  coord_map() + labs(title = "Church-related-Cases spread over South Korea")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Playing with this graph
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table_witout_daegu, aes(x=longitude, y=latitude, 
+                                                     size = confirmed),
+             color = "darkred") + 
+  scale_size_continuous(range = c(3, 7)) +
+  coord_map() + labs(title = "Church-Cases spread over South Korea")
+
+
+
+scale_size_continuous(range = c(minSize, maxSize))
+
+#######
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table, aes(x=longitude, y=latitude, 
+                                        size = confirmed),
+             color = "darkred") + 
+  scale_size_continuous(range = c(3, 7)) +
+  coord_map() + labs(title = "Church-Cases spread over South Korea")
+
+
+#####
+# Splitting the Daegu and other confirmed cases
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = plotting_table_witout_daegu, aes(x=longitude, y=latitude, 
+                                                     size = confirmed),color = "darkred") + 
+  scale_size_continuous(range = c(3, 7)) +
+  geom_point(data = subset(plotting_table, province=="Daegu"), aes(x=longitude, y=latitude, 
+                                                                   size = confirmed),color = "palevioletred4") +
+  geom_text_repel(data = subset(locations_seoul_church, Location=="Shincheonji Church"), 
+                  aes(x = Longitude, y = Latitude, label = Location), 
+                  fontface = "bold", nudge_x = c(1, -2), 
+                  nudge_y = c(0.4, -0.5)) +
+  coord_map() + labs(title = "Church-Cases spread over South Korea")
+
+
+
+
+data = subset(super_spreader, Event_Name=="Shincheonji Church")
+
+
+
+# change data type from character to double
+case_02_withcoordinates[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+head(case)
+
+# Plotting map of South Korea with different sized dots according to number of cases
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
+  coord_map() + labs(title = "Covid-Cases spread over South Korea")
+
+# Seems like there were two hotspots indeed! Probably some major cities? Seoul? Also we heard, that 
+# there was quite some rumor about a church-event causing the spread in South Korea. Could that
+# be the reason for the larger outbreak in the south-east?
+
+# minor thing: we do have these things in our data tables, we don't have to do that manually!
+# DOUBLE CHECK THIS AND FIX IT BEFORE THE FINAL SUBMISSION!
+locations_seoul_church <- data.frame(Location = c("Seoul", "Shincheonji Church"),
+                                     City = c("Seoul", "Daegu"),
+                                     Longitude = c(127.024612,128.600006),
+                                     Latitude = c(37.532600,35.866669))
+
+ggplot() +
+  geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
+               colour = "grey", size = 0.25) +
+  geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
+  geom_text_repel(data = locations_seoul_church, aes(x = Longitude, y = Latitude, label = Location), 
+                  fontface = "bold", nudge_x = c(1, -2), 
+                  nudge_y = c(0.5, -0.5)) +
+  coord_map() + labs(title = "Covid-Cases spread over South Korea")
+
+
+
+
+
+
+
+
+
+
+
+
+
+colors_claim02 <- c("Shinchoenji Church related" = "red", 
+                    "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020)" = "red",
+                    "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020" = "blue")
+
 
 #how many people were infected by patient 31
 flights[, .N, by = 'AIRLINE']
