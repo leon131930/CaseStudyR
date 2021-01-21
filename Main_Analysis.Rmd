@@ -949,7 +949,7 @@ cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 Above results show no significant association of both variables; we can not reject the null hypothesis of not correlated data.
 
 **Interpretation**
-
+...
 
 
 
