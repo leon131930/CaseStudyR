@@ -796,18 +796,12 @@ After joining both tables, we plot the data and calculate the correlation betwee
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
-
-
-
 #***Data preparation Time table:***
 timecs <- copy(time)
 timecs <- timecs[, date:= as.IDate(date, format= "%d/%m/%Y")]
 
 #***Merge merge time table and searchtrend table, full outer join***
 merged_dt1 <- merge(timecs, searchtrend, by = "date", all = TRUE)
-
-
-
 
 #set colors for visualization
 searchcolour <- "#0000CD"
@@ -827,10 +821,11 @@ ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
   theme(legend.position="bottom", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = searchcolour))
-
-
-
 ```
+Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time.
+To account for the different units of both variables, use a second y-axis.
+It can be deduced that the course of both variables is quite similar.
+We therefore calculate the pearson correlation:
 
 <p>&nbsp;</p>
 
@@ -840,15 +835,34 @@ merged_dt1 <- merged_dt1[date %between% c("2020-02-15", "2020-06-29")]
 corr1 <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
 corr1
 
-#Pearson's correlation test
-cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
+```
+To account for the time lag we see in above plot, we calculate the cross correlation:
 
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
 #Using Cross correlation to show that search cases can indicate covid cases
 # -> Shows high correlation (0.92) for a time lag of 6 days
 ccfvalues1 <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily cases", plot = TRUE)
 ccfvalues1
+```
 
+The cross correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
+meaning that an increase of searches best reflects increased number of daily cases six days later, with a strong positive correlation.
 
+Given those indicative results, we apply the pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+#Pearson's correlation test
+cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
+```
+
+We see that the p-value is very low, allowing us to reject the null hypothesis - which indicates that there is indeed a correlation between search volume and daily cases.
+To further visualize this result, we use permutation testing (1000 times):
+
+```{r echo=FALSE, message=FALSE}
 #***apply permutation testing to test whether this correlation could have arisen by chance***
 dt_permuted <- copy(merged_dt1)
 set.seed(2)
@@ -869,9 +883,23 @@ for(i in 1:m){
 #plot T_permuted as histogram
 ggplot(data.table(T_permuted), aes(x = T_permuted)) +
   geom_histogram() +
-  geom_vline(aes(xintercept= corr1, color = "oberserved correlation"))
+  geom_vline(aes(xintercept= corr1, color = "oberserved correlation"))+
+  theme(legend.title = element_blank())
 
 ```
+
+As the permutation plot shows, it is very unlikely that our observed correlation has arisen by chance.
+
+**Short Discussion:**
+Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
+
+But could there by an additional confounding variable distorting this result?
+Considering there have been superspreader events in the beginning of the pandemic, 
+
+
+Given t
+We finally investigate a possible confounding variable
+
 
 <p>&nbsp;</p>
 
@@ -921,10 +949,6 @@ cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 ```
 
 **Short Analysis**
-
-* The term "coronavirus" was searched many times more often in comparison to the other two available search terms "flu" and "cold".
-* Both the search term "coronavirus" and "cold" show partial similarity in its course with the daily confirmed cases (e.g. strong increase in mid-February).
-* The gradual increase of the search term "flu" starting in October 2019 could be an indicator of the first (not-tested) covid cases. But there is further investigation needed to differentiate the data from the annual flu-season.
 
 **Discussion**
 
