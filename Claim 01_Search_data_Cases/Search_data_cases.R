@@ -41,7 +41,7 @@ patientinfocs[, date := sub("confirmed_date", "date", confirmed_date)]
 patientinfocs[, date:= as.IDate(date)]
 
 #plot all church cases
-ggplot(patientinfocs[date %between% c("2020-02-18", "2020-03-10")], aes(x = date)) +
+ggplot(patientinfocs[date %between% c("2020-02-18", "2020-02-28")], aes(x = date)) +
   geom_line(aes(y=dailychurchcases))+
   geom_point(aes(y=dailychurchcases))+
   scale_x_date(date_breaks = "1 day", date_labels = "%d-%m")
@@ -62,14 +62,14 @@ timecs <- copy(time)
 timecs <- timecs[, date:= as.IDate(date, format= "%d/%m/%Y")]
 
 #merge time table and searchtrend table, full outer join
-merged_dt <- merge(timecs, searchtrend, by = "date", all = TRUE)
+merged_dt1 <- merge(timecs, searchtrend, by = "date", all = TRUE)
 
 #merge timecs with patientinfocs, full outer join
 merged_dt2 <- merge(timecs, patientinfocs, by = "date", all = TRUE)
 
 
 #plot search and daily cases with search volume on left y axis
-ggplot(merged_dt[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
+ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   geom_line(aes(y=(coronavirus), col = "relative search volume")) +
   geom_line(aes(y=daily_cases/8, col = "daily confirmed cases")) +
@@ -97,21 +97,22 @@ ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-10")],aes(x=date)) +
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = churchcolour))
 
-#calculate observed correlation (daily cases vs churchcases) 
-merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-26")]
 
-corr <- cor(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method = 'pearson')
+#calculate observed correlation (daily cases vs churchcases) 
+merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-28")]
+
+corr <- cor(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method = 'spearman')
 corr
 
 #checking cross correlation
-ccf(merged_dt2$daily_cases,merged_dt2$dailychurchcases, na.action = na.pass)
+ccf(merged_dt2$dailychurchcases, merged_dt2$daily_cases, na.action = na.pass)
 
 ?ccf()
 merged_dt2
 
 #calculate observed correlation (daily cases vs search) for date range Mid February - End of June
 merged_dt1 <- merged_dt[date %between% c("2020-02-15", "2020-06-29")]
-corr <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'spearman')
+corr <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
 corr
 
 
@@ -133,12 +134,10 @@ z_krit
 # Lehne H0 ab, wenn der Absolutwert (Betrag) der Teststatistik größer ist als der kritische Wert:
 abs(t) > z_krit
 
-cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="spearman")
+cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
 
 ################## Using Cross correlation to show that search cases can indicate covid cases######################
 # -> Shows high correlation (0.92) for a time lag of 6 days
-ccf(merged_dt1$daily_cases,merged_dt1$coronavirus)
-
 ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily # of cases")
 ccfvalues <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, plot = FALSE)
 ccfvalues
