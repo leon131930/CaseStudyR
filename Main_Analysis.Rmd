@@ -34,6 +34,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # #required libraries for Claim 4
 # install.packages("patchwork")
 # install.packages("hrbrthemes")
+#install.packages("raster")
+#install.packages("mapproj")
 ```
 
 ```{r echo = TRUE, message=FALSE}
@@ -57,6 +59,8 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(maptools)
 library(sp)
+library(raster)
+library(mapproj)
 ```
 
 ```{r  echo=TRUE, message=FALSE}
@@ -71,7 +75,7 @@ searchtrend <- fread("./extData/SearchTrend.csv")
 region <- fread("./extData/Region.csv")
 weather <- fread("./extData/Weather.csv")
 timeProvince <- fread("./extData/TimeProvince.csv")
-south_korea <- getData("GADM", country = "South Korea", level = 1)
+south_korea <- raster::getData("GADM", country = "South Korea", level = 1)
 
 ```
 
