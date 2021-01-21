@@ -119,30 +119,30 @@ plot(plot_germany)
 ```
 
 
-* After a massive increase in the number of daily cases, it appears that the government of South Korea was able to reduce the number of daily cases remarkably within a few days and continued to retain a constant low level.
-* The total number of daily cases in South Korea compared to Germany is considerably lower. Considering the population of each country(~50 Mio. vs. 80 Mio.) this seems to be an outstanding achievement.
-* Therefore, we aim to investigate how South Korea was able to achieve these results. 
+* After a massive increase in the number of daily cases in South Korea, one can observe that these numbers decline remarkably in a short time period and continued to stay on a constant low level.
+* Germany on the other hand struggled with a multiple of daily cases and the high numbers remained on a high level for a longer time period before dropping again. 
+* Considering that both countries Germany and South Korea are fairly similar in terms of the population of each country(~50 Mio. vs. 80 Mio.), it thus seems interesting to further investigate what happened in South Korea. 
 
 
 <p>&nbsp;</p>
 
 
 ## Claim 01 
-#### The more active measures imposed from the government of South Korea, the lower the number of daily cases. 
+#### By imposing a multitude of different types of policies, the government of South Korea could reduce the number of daily infection cases.
 
 **Our initial motivation:**
 
-* As the number of infection cases in South Korea increased heavily, the government became more active in terms of measures with the aim to decrease the number of daily infection cases.
+* As the number of infection cases in South Korea increased heavily, the government became more active in terms of new restricting policies across all areas of life with the aim to decrease the number of daily infection cases. 
 
 **Claim description in more detail:**
 
-* XXX
+* The government of South Korea imposed different types of polices across all areas of life.
 
 **Our approach:**
 
-* First, we inspect the different types of measures and wehn they were imposed from the government during the period from January 2020 to July 2020. 
-* Then, we show a specific types of measures in more detail
-* Finally, we inspect whether there is a association between the number of measurements and the development of the number of daily infection cases.
+* First, we inspect the different types of policies and when they were imposed from the government during the period from January 2020 to July 2020. 
+* Then, we show an example of imposed policies in the areas administration, education and social area.
+* Finally, we inspect whether there is a significant association between the number of policies and the development of the number of daily infection cases.
 
 <p>&nbsp;</p>
 
@@ -155,8 +155,8 @@ nbPolicies <- policy_copy[, .N, by=type] %>% setorder(., -N)
 plot_nbPolicies <- ggplot(nbPolicies, aes(x = reorder(type, N) ,y = N)) +
   geom_bar(stat="identity", width = 0.7) + 
   coord_flip() +
-  labs(x = "Type of Policy", y = "Number of Measures",
-       title="Different Policies")+
+  labs(x = "Type of Policy", y = "Number of Policies",
+       title="Type of Policies")+
   theme(legend.position="none") 
 
 
@@ -169,8 +169,8 @@ policyDay <- policyDay[, count := .N, by=start_date]
 plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_bar() +
-  labs(x = "Time", y = "Number of Measures",
-       title="Start of the Measures")+
+  labs(x = "Time", y = "Number of Policies",
+       title="Start of the Policies")+
   theme(legend.position="none") +
   geom_text(aes(label=stat(count)), stat = "count", vjust = -0.5)
 
@@ -180,9 +180,9 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol=2, nrow=1)
 
 **Short Analysis**
 
-* The number of immigration and education policies dominate the other measures. This is related to the fact that immigration measures are counted for each country and education measures for each school type.
+* The number of immigration and education policies dominate the other policies. This is related to the fact that immigration policies are counted for each country and education policies for each school type.
 
-* Shortly after the number of infection cases surged the government of South Korea reacted with numerous measures in all kind of area. The many measures in the middle of April are related to the Online-school opening measures that all took place at once for each type of school. 
+* Shortly after the number of infection cases surged the government of South Korea reacted with numerous policies in all kind of area. The many policies in the middle of April are related to the Online-school opening policies that all took place at once for each type of school. 
 
  
 <p>&nbsp;</p>
@@ -194,7 +194,7 @@ time_copy[,confirmed_date:=as.Date(date,"%d/%m/%y")]
 time_copy[, confirmed_date:= as.IDate(confirmed_date)]
 
 
-#extract education measures from table policy
+#extract education policies from table policy
 date_education <- policy[type == "Education"]
 
 
@@ -250,14 +250,14 @@ ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
   labs(x = "Time", y = "Cases per Day",
-       title="Administrative / Education / Social Measures")+
+       title="Administrative / Education / Social Policies")+
   theme(legend.position="none") 
 
 ```
 
 **Short Analysis**
 
-* After the number of daily cases have reached peak in March, numerous meausures with the aim of social distancing, such as delaying school start, were introduced. It seems that through these measures the number of daily cases could be reduced.
+* After the number of daily cases have reached peak in March, numerous policies with the aim of social distancing, such as delaying school start, were introduced. It seems that through these policies the number of daily cases could be reduced.
 * In the beginning of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
 
 <p>&nbsp;</p>
@@ -265,7 +265,7 @@ ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
 
 ```{r echo=FALSE, message=FALSE}
 
-# Policies: cumulative Measures per Day
+# Policies: cumulative policies per Day
 policy_copy <- copy(policy) 
 
 policy_day_start <- policy_copy[,.(start_date)]  %>% .[,.N,by = "start_date"]
@@ -290,33 +290,32 @@ time_copy[, confirmed_date:= as.IDate(confirmed_date)]
 time <- time[,.(confirmed_date, daily_cases)]
 colnames(time) <- c("date", "daily_cases")
 
-#merge number of cum. measures and daily cases
+#merge number of cum. policies and daily cases
 merge_CasesMeasures <- 
   merge(x = time, y = merge_StartEnd, by = "date", all.x = TRUE)
 merge_CasesMeasures[is.na(merge_CasesMeasures)] <- 0
 
 merge_CasesMeasures[, cumulativeNumbers := cumsum(difference)]
 
-# Plot "daily cases" and "cum. number of measures" on two different y axis
+# Plot "daily cases" and "cum. number of policies" on two different y axis
 ggplot(merge_CasesMeasures, aes(x = date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_line(aes(y=`daily_cases`, col = "Daily Cases")) +
-  geom_line(aes(y=`cumulativeNumbers` * 8,col = "Cum. Measures")) + 
-  labs(title="Daily Cases and Number of Measures", x = "Time") +
+  geom_line(aes(y=`cumulativeNumbers` * 8,col = "Cum. Policies")) + 
+  labs(title="Daily Cases and Number of Policies", x = "Time") +
   scale_y_continuous(name = "Cases per Day",
   # Add a second axis, with a scale / 8
-  sec.axis = sec_axis(~./ 8, name="Number of cum. Measures")) +
+  sec.axis = sec_axis(~./ 8, name="Number of cum. Policies")) +
   theme(legend.position="right", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90))
 
 
 #Calculate statistics
 #Correlation 
-cor_CasesMeasures <- cor(merge_CasesMeasures$cumulativeNumbers, merge_CasesMeasures$daily_cases, method = 'spearman')
+cor_CasesMeasures <- cor(merge_CasesMeasures$cumulativeNumbers, merge_CasesMeasures$daily_cases, method = 'pearson')
 cor_CasesMeasures
 
 #Cross-correlation
-ccfValues <- ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50)
 ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, main = NA)
 ```
 
@@ -325,9 +324,9 @@ ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, m
 **Interpretation:**
 
 * The correlations in this region are negative, indicating that an above 
-average value of measures is likely to lead to a below average value of daily cases 
+average value of policies is likely to lead to a below average value of daily cases 
 about 30 days later. 
-* And, a below average of measures is associated with a likely above average daily cases value about 6 months later.
+* And, a below average of policies is associated with a likely above average daily cases value about 6 months later.
 
 
 <p>&nbsp;</p>
@@ -337,13 +336,18 @@ about 30 days later.
 
 #Test - Statistics
 test <-cor.test(merge_CasesMeasures$cumulativeNumbers, 
-                merge_CasesMeasures$daily_cases,method="spearman")
+                merge_CasesMeasures$daily_cases,method="pearson")
 test
 
 p_value <- test$p.value
 p_value
 
 ```
+
+**Discussion:**
+* Due to the fact, that there are multiple active policies in the same time period and also across different areas it is not possible to reduce the effect of declining number of daily cases to one or even a type of policies. 
+* However, it can be said that it is very likly that the different polices from the government had an influence on the decrease in numbers. 
+
 
 <p>&nbsp;</p>
 
