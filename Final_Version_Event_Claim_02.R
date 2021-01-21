@@ -18,6 +18,7 @@ patientinfo <- fread("./extData/PatientInfo.csv")
 time <- fread("./extData/time.csv")
 case_old <- fread("./extData/Case.csv")
 region <- fread("./extData/Region.csv")
+south_korea <- getData("GADM", country = "South Korea", level = 1)
 
 # Creating copies from those dataframes for super spreader claim - now our claim 02
 case_02 <- copy(case)
@@ -32,7 +33,7 @@ region_02 <- copy(region)
 #areas the cases were really high or was it a more "even" spread throughout the whole country?
 
 # Loading South Korea Data
-south_korea <- getData("GADM", country = "South Korea", level = 1)
+# south_korea <- getData("GADM", country = "South Korea", level = 1)
 class(south_korea)
 
 # Fortify shape file to dataframe format
@@ -52,9 +53,11 @@ ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed),
-             color = "violetred") +
+             color = "violetred",
+             alpha = 0.7) +
   scale_size_continuous(range = c(2, 5)) +
-  coord_map() + labs(title = "Covid-Cases spread over South Korea")
+  coord_map() + 
+  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
 
 # Seems like there were two hot-spots indeed! Probably some major cities? Seoul? Also we heard, that 
 # there was quite some rumor about a church-event causing the spread in South Korea. Could that
@@ -70,16 +73,46 @@ ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed),
-             color = "violetred") +
+             color = "violetred",
+             alpha = 0.7) +
   scale_size_continuous(range = c(2, 5)) +
   geom_text_repel(data = locations_seoul_church, aes(x = Longitude, y = Latitude, label = Location), 
                   fontface = "bold", nudge_x = c(1, -2), 
                   nudge_y = c(0.5, -0.5)) +
-  coord_map() + labs(title = "Covid-Cases spread over South Korea")
+  coord_map() + 
+  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
+  
+# Alright, around the location of the church there seemed indeed to be a lot of cases. Let's have a
+# closer look on this.
 
-# Alright, around the location of the church there seemed indeed to be a lot of cases. But this 
-# doesn't necessarily mean that those cases are actually all related to the church. Could also be 
-# a highly popular area where a lot of foreign people from other countries travel to. Right?
+#####################
+# In the following we will use the patientinfo dataset as a representative subset of all cases. It not
+# only provides information for over 5,000 patients but also provides us with details such as
+# infection_reason as well as confirmed date. "Time" and "Case" lack at least one of these details.
+
+# Plotting Daily Cases related to the Church together with overall Daily Cases
+# Calculate the daily cases (overall) and add as column
+patientinfo_02[, daily_cases := .N, by = confirmed_date]
+
+# Create new table for church cases only
+patientinfo_02_church <- patientinfo_02[grep("Shincheonji",infection_case)]
+# Add column for daily church cases
+patientinfo_02_church <- patientinfo_02_church[, dailychurchcases := .N, by = confirmed_date]
+
+# Plotting both over time
+ggplot() + geom_line(data = patientinfo_02,
+                     aes(x=confirmed_date, y=daily_cases, colour="black")) +
+  geom_line(data = patientinfo_02_church, 
+            aes(x=confirmed_date, y= dailychurchcases, colour = "red")) +
+  labs(x="Time", y="Cases per Day", title = "Shincheonji vs. Overall Daily Cases over Time") +
+  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Shincheonji Church related Cases")) +
+  theme(legend.position="bottom", legend.title = element_blank())
+
+# Mhm... doesn't look that bad, does it? However when you think about the fact that this is only one
+# single event, the numbers are not that low at all..
+# ALso, in terms of time it still fits pretty well to the beginning of the first larger outbreak. 
+# Let's dive a bit deeper. There has to be a reason why everyone was going nuts about this one!
+# Let's have a look at the case datatable as it includes an even larger database of confirmed cases.
 
 #####################
 
@@ -110,56 +143,10 @@ ggplot(data = top_10_cases_without_etc,
 
 ########################
 
-###DISCLAIMER###
-# Disclaimer: we will now use the patientinfo data table because in this datatable we have information for both, the
-# number of daily cases as well as the infection reason for those cases. Unfortunately we don't have an infection
-# reason within the time datatable. We are not able to merge both tables because the time table provice cumulated 
-# information. Since the time datatable includes a lot more daily cases than the patientinfo
-# datatable we will first have a look, whether the patientinfo dataset can be seen as a subset of the time dataset.
-
-##TALK ABOUT THIS WITH THE OTHERS!
-#Let's see whether it makes more sense to put both graph lines into one graph - we should talk about this!
-#ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) +
-#geom_line(colour="black") +
-#geom_line(data = time_02, colour="green") +
-#labs(x="Time", y="Cases per Day")
-
-# Graph showing total daily cases over time, patientinfo database
-patientinfo_02[, daily_cases := .N, by = confirmed_date]
-total_cases_patientinfo <- ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) +
-  geom_line(colour="black") + labs(x="Time", y="Cases per Day")
-total_cases_patientinfo
-
-# Graph showing total daily cases over time, time database, total cases in Korea per day
-time_02[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-time_02[, confirmed_date:= as.IDate(confirmed_date)]
-total_cases_time <- ggplot(time_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black")+
-  labs(x="Time", y="Cases per Day")
-total_cases_time
-
-#Let's put both graphs next to each other
-library(ggpubr)
-ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
-
-# Due to the quite similar progression of the two graphs, we will assume that we can treat
-# patientinfo as a valid, representable subset of the time datatable
-###DISCLAIMER END###
-
 # Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji
 # Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow"
-# Combined. Let's have a closer look at the Shincheonji Church Events. How did it start? And
-# how did it effect the following daily cases?
-
-# Plotting Daily Cases related to the Church together with overall Daily Cases
-ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(aes(colour="black")) +
-  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), 
-            aes(colour = "red")) +
-  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
-  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Church related Cases")) +
-  theme(legend.position="bottom", legend.title = element_blank())
-
-# Ok, seems like the church actually had a serious impact especially at the beginning.
-# But why did it start in the church in the first place? Was there one certain trigger?
+# Combined. Let's have a closer look at the beginning of the Shincheonji Church Events. 
+# How did it start? Was there a certain "trigger"?
 
 # Look for the first patient infected by Covid-19 that was associated with the Shincheonji Church
 df_church = subset(patientinfo_02, select = -c(country, province))
@@ -170,15 +157,16 @@ earliest_dates <- setDT(df_church)[, .SD[which.min(confirmed_date)], by = infect
 # Let's look for the row with the min value for the Shincheonji church
 earliest_dates %>% filter(infection_case == "Shincheonji Church")
 
-# Turns out we are! Patient Number 31, in her 60s was diagnosed with Covid on Tuesday, 18th Feb 2020
-# and she has an insane amount of contact numbers! No wonder Shincheonji Church cases were so
-# high... imagine those 1160 contacts infecting even more people!
+# Turns out we are! Patient Number 31, in her 60s, was diagnosed with Covid on Tuesday, 18th Feb 2020
+# as the first person related to the Shincheonji Church and she has an insane amount of contact numbers!
+# No wonder Shincheonji Church cases were so high... imagine those 1160 contacts infecting even more people!
 
-# Let's quickly plot this over time and see when patient 31 was going to the church and at what point
-# she was diagnosed.
+# Let's quickly plot this over time to get the whole picture and see when patient 31 was going to the 
+# church and at what point she was diagnosed.
 
 # Create a data table with the main spreader event: Shincheonji Church.
 # According to the New York times the event in question took place on Feb 16th 2020
+# Source can be found here: nytimes.com/2020/02/21/world/asia/south-korea-coronavirus-shincheonji.html
 super_spreader_church <- data.table(Event_Name= c("Shincheonji Church"), 
                                     Date=c("2020-02-16"))
 
@@ -186,28 +174,31 @@ super_spreader_church <- data.table(Event_Name= c("Shincheonji Church"),
 super_spreader_church[, Date:=as.Date(Date)]
 
 # Plot everything over time
-ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
-  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), colour = "red") +
+ggplot() + geom_line(data = patientinfo_02,
+                     aes(x=confirmed_date, y=daily_cases), colour="black") +
+  geom_line(data = patientinfo_02_church, 
+            aes(x=confirmed_date, y= dailychurchcases), colour = "red") +
   geom_vline(data = super_spreader_church,
              aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020) - acc. to NY Times")) +
   geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
              aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020")) +
-  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
-  theme(legend.position="bottom",legend.direction="vertical", legend.title = element_blank())
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Church Outbreak") +
+  theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())
 
-# Seems like one person can kick-start an enourmus outbreack real quick.. and not in a good way!
 
-# But how can this one event or this one person be responsible for the outbreak in a whole country?
-# Like obviously 1160 contacts is HUGE, but if this happens in one city it doesn't necessarily mean
-# that the whole outbreak was caused by this one event, does it?
+# Alright, this fits the timeline and development of overall cases pretty well.
+# However, this still doesn't provide a clear picture why the Church was blamed for the virus to go
+# wild. Just because one event in Daegu results in an enormous amount of cases doesn't necessarily 
+# mean, that the whole country will be affected by this.
 
-# NOTE: we were trying to do some Networking clustering however due to the fact that we are only able
-# to trace back a total number of 17 people to patient Number 31 via the patientinfo datatable, we
-# focused on the spread throughout the country.
+# SIDENOTE: we were trying to do some Network clustering with the infection chain of patient Nr. 31
+# however due to the fact that we are only able to trace back a total number of 17 people to 
+# patient Number 31 via the patientinfo datatable, we focused on different visualizations.
 sum(patientinfo_02$infected_by == "1200000031")
 
-# Well, people travel, you know? Let's have a look how many people related to the Church were 
-# tested positive for Covid in regions far away from the Church
+# Back to the question, how one event can affect a whole country.
+# Since people are well-known for not staying at one place all the time, let's have a look how many 
+# people related to the Church were tested positive for Covid in regions far away from the Church.
 
 # Filter case datatable for Church cases
 church_cases_around_SK <- case_02%>% filter(infection_case=="Shincheonji Church")
@@ -226,10 +217,10 @@ ggplot(data = church_cases_outside_daegu,
   geom_bar(stat="identity", width = 0.7, fill = "mediumvioletred") +
   geom_text(aes(label=confirmed), hjust=-.1, color="black", size=3) +
   labs(x="Number of Cases", y="Region", 
-       title = "Shincheonji Church related Cases OUTSIDE of Daegu")
+       title = "Confirmed Shincheonji Church related Cases OUTSIDE of Daegu")
 
 # Alright, indeed a couple of people. Gyeongsangbuk-do is probably close to Daegu though, right?
-# Are we able to plot this on a map showing where exactly this occured?
+# Are we able to plot this on a map showing where exactly this occurred?
 
 # Create a table where region and city are the same in order to get coordinates for regions
 church_regions <- region_02%>% filter(province==city)
@@ -259,18 +250,21 @@ ggplot() +
 # Doing that again but withouht Daegu bc it fucks up the point sizes
 plotting_table_witout_daegu <- plotting_table[!(plotting_table$province=="Daegu")]
 
-# Plotting map again and making it a bit more aestetic at the same time
+# Plotting map again and making it a bit more aesthetic at the same time
 # DISCLAIMER #
 # In order to be able to map the geom_points onto the map, we merged the confirmed cases for the 
-# whole region with the main city (so for city Seoul the total number actually relate to the whole
-# Seoul region.)
+# whole region with the main city (so for the city Seoul the total number actually relate to the whole
+# Seoul region.). This results in the points being a bit "off" and not in the center of every region.
+# However we believe it still shows pretty well how cases related to the Church poppped up all over 
+# the country.
+# DISCLAIMER END #
 ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = plotting_table_witout_daegu, aes(x=longitude, y=latitude, 
                                                      size = confirmed),
              color = "darkred",
-             alpha = 0.7,) +
+             alpha = 0.7) +
   scale_size_continuous(range = c(3, 7)) +
   geom_text_repel(data = locations_seoul_church, 
                   aes(x = Longitude, y = Latitude, label = Location), 
@@ -278,21 +272,21 @@ ggplot() +
                   nudge_y = c(0.4, -0.4)) +
   coord_map() + labs(title = "Church-related-Cases spread over South Korea (excl. Daegu)")
 
-### ANALYSIS ###
-# It seems like the Event in the church indeed has huge effects on the Covid spread throughout South
+### DISCUSSION ###
+# It seems like the event in the church indeed had significant effects on the Covid spread throughout South
 # Korea and it highlights the importance of policies such as travel restrictions making sure that
 # in case such an event happens, the infected people do not travel to a different location, taking
 # the virus with them.
 # However in terms of the claim one cannot say for sure, that the Church was the main reason for 
-# the severe Covid outbreak in South Korea there are simply too many other variables that influenced
-# this. For one, there were multiple spreader events, not only the Church one (see the Bar Chart "Top
-# 10 Infection Reasons"). Additionally, we do not know for sure, that Patient Number 31 was the 
+# the severe Covid outbreak in South Korea. There are simply too many other variables that could have 
+# influenced this. For one, there were multiple spreader events, not only the Church one (see the Bar 
+# Chart "Top 10 Infection Reasons"). Additionally, we do not know for sure, that Patient Number 31
+# was the only person infected at that Church event. While she was the first one to be tested positive
 # only person infected at that Church event. While she was the first one to be tested positive
-# we do not know where there was a 2nd, 3rd or 4th person infected at that church event that 
+# we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that 
 # simply wasn't tested positive or didn't get tested at all. And while the case datatable states
 # that Patient 31 hat a total of 1160 contacts, we are only able to trace back a total of 17 direct
 # connections via the patientinfo datatable.
-
 
 # To sum it up, YES, the Church Event had a serious impact on the Covid spread in South Korea.
 # However we are not able to confirm the claim 100% stating that it was the number one reason
