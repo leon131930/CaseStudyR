@@ -68,6 +68,7 @@ RKI_data <- fread("./extData/DE_InfectionCases.csv")
 patientinfo <- fread("./extData/PatientInfo.csv")
 case <- fread("./extData/Case.csv")
 searchtrend <- fread("./extData/SearchTrend.csv")
+time <- fread("./extData/Time.csv")
 region <- fread("./extData/Region.csv")
 weather <- fread("./extData/Weather.csv")
 timeProvince <- fread("./extData/TimeProvince.csv")
@@ -452,7 +453,7 @@ map_overall_cases
 patientinfo_02[, daily_cases := .N, by = confirmed_date]
 
 # Create new table for church cases only
-patientinfo_02_church <- patientinfo_02[grep("Shincheonji",infection_case)]
+patientinfo_02_church <- patientinfo_02[infection_case=="Shincheonji Church"]
 # Add column for daily church cases
 patientinfo_02_church <- patientinfo_02_church[, dailychurchcases := .N, by = confirmed_date]
 
@@ -774,7 +775,7 @@ As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstan
 <p>&nbsp;</p>
 
 ## Claim 04
-#### Search Data Cases.
+#### Connection of Search Data and Daily Cases
 
 **Our initial motivation:**
 
@@ -796,80 +797,130 @@ As the data for the search volume contains many values below 0.0001, we multiply
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
+# importing PatientInfo, Searchtrend, and time table
+patientinfo <- fread("./extData/PatientInfo.csv")
+searchtrend <- fread("./extData/SearchTrend.csv")
+time <- fread("./extData/Time.csv")
+
+
+#***Data preparation Time table:***
+timecs <- copy(time)
+timecs <- timecs[, date:= as.IDate(date, format= "%d/%m/%Y")]
+
+#***Merge merge time table and searchtrend table, full outer join***
+merged_dt1 <- merge(timecs, searchtrend, by = "date", all = TRUE)
+
+
+
+
+#set colors for visualization
+searchcolour <- "#0000CD"
+dailycasecolour <- "#ff0000"
+churchcolour <- "#9400D3"
+
+#plot search volume and daily cases, using two y-axis because of relative values of searchtrend table
+ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
+  geom_line(aes(y=(coronavirus), col = "Relative search volume")) +
+  geom_line(aes(y=daily_cases/8, col = "Daily confirmed cases")) +
+  scale_color_manual(values=c(dailycasecolour,searchcolour))+
+  labs(x="Time", title="Daily covid cases & relative search volume for 'coronavirus'")+
+  scale_y_continuous(
+    name = "relative search volume",
+    sec.axis = sec_axis(trans=~.*8, name="daily confirmed cases",labels = scales::comma))+
+  theme(legend.position="bottom", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = dailycasecolour),
+        axis.title.y.left = element_text(color = searchcolour))
+
+
+
+```
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+#calculate pearson correlation (daily cases vs search) for date range Mid February - End of June
+merged_dt1 <- merged_dt1[date %between% c("2020-02-15", "2020-06-29")]
+corr1 <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
+corr1
+
+#Pearson's correlation test
+cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
+
+#Using Cross correlation to show that search cases can indicate covid cases
+# -> Shows high correlation (0.92) for a time lag of 6 days
+ccfvalues1 <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily cases", plot = TRUE)
+ccfvalues1
+
+
+#***apply permutation testing to test whether this correlation could have arisen by chance***
+dt_permuted <- copy(merged_dt1)
+set.seed(2)
+
+#function to calculate correlation
+correlation <- function(dt_permuted){
+  corr_p <- cor(dt_permuted$daily_cases, dt_permuted$coronavirus_sampled, method = 'pearson')}
+
+# create list with 1000 NA-values
+m <- 1000
+T_permuted <- rep(NA, m)
+
+#repeat 1000 times: sample the column "coronavirus", calculate correlation and store variable in T_permuted
+for(i in 1:m){
+  dt_permuted[, coronavirus_sampled := sample(coronavirus)]
+  T_permuted[i] <- correlation(dt_permuted)}
+
+#plot T_permuted as histogram
+ggplot(data.table(T_permuted), aes(x = T_permuted)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept= corr1, color = "oberserved correlation"))
+
+```
+
+<p>&nbsp;</p>
+
+```{r echo=FALSE, message=FALSE}
+#***check influence of church superspreader event as 3rd confounding variable influencing daily cases***
+#***Data preparation Patientinfo table:***
+patientinfocs <- copy(patientinfo)
+#filter for Shincheeonji Curch event
+patientinfocs <- patientinfocs[grep("Shincheonji",infection_case)]
 
 #create new column for number of daily cases, based on count of confirmed_date
-patientinfo_copy = copy(patientinfo)
-patientinfo_copy <- patientinfo_copy[, daily_cases := .N, by = confirmed_date]
+patientinfocs <- patientinfocs[, dailychurchcases := .N, by = confirmed_date]
+
+#new column/rename "confirmed_date" to "date" (otherwise not able to join)
+patientinfocs[, date := sub("confirmed_date", "date", confirmed_date)]
+patientinfocs[, date:= as.IDate(date)]
+
+#***merge time table with Patientinfo table, full outer join***
+merged_dt2 <- merge(timecs, patientinfocs, by = "date", all = TRUE)
 
 
-#rename confirmed_date to date (otherwise not able to join)
-patientinfo_copy[, date := sub("confirmed_date", "date", confirmed_date)]
-#change date class to "IDate"
-patientinfo_copy[, date:= as.IDate(date)]
-
-#full outer join of patientinfo and searchtrend
-search_patient <- merge(patientinfo_copy, searchtrend, by = "date", all = TRUE)
-
-#set colour for visualization
-searchcolour <- "#00c7c6"
-dailycasecolour <- "#ff0000"
-
-# coronavirus search volume & daily cases
-ggplot(search_patient[date >= "2020-01-01" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=coronavirus*1.5, col = "Searches for 'coronavirus'")) +
-  labs(title="Daily Covid Cases & Search Volume for 'coronavirus'", x = "Time")+
-  scale_y_continuous(name = "Cases per Day",
-    # Add a second axis, with a scale *10k 
-  sec.axis = sec_axis(trans=~./1.5*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-
-```
-
-<p>&nbsp;</p>
-
-```{r echo=FALSE, message=FALSE}
-  
-# flu search volume & daily cases
-ggplot(search_patient[date >= "2019-09-01" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "2 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=flu*100, col = "Searches for 'flu'")) +
-  labs(title="Daily Covid Cases & Search Volume for 'flu'", x = "Time")+
+#plot Shincheonji church related cases and (total) daily cases, using two y-axis to better visualize the course
+ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-08")],aes(x=date)) +
+  scale_x_date(date_breaks = "2 day", date_labels = "%d.%m")+
+  geom_line(aes(y=daily_cases/20, col = "daily cases")) +
+  geom_line(aes(y=(dailychurchcases), col = "Shincheonji church daily cases")) +
+  scale_color_manual(values=c(dailycasecolour, churchcolour))+
+  labs(x="Time", title="Shincheonji church daily cases vs. total daily cases")+
   scale_y_continuous(
-    name = "Cases per Day",
-    # Add a second axis, with a scale *10k 
-    sec.axis = sec_axis(trans=~./100*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
-```
+    name = "Shincheonji church daily cases",
+    sec.axis = sec_axis(trans=~.*20, name="daily cases",labels = scales::comma))+
+  theme(legend.position="bottom", legend.title = element_blank(), 
+        axis.title.y.right = element_text(angle=90, color = dailycasecolour),
+        axis.title.y.left = element_text(color = churchcolour))
 
-<p>&nbsp;</p>
 
-```{r echo=FALSE, message=FALSE}
+#calculate observed correlation (daily cases vs churchcases), for a time period of start of church-cases until 10 days later
+merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-28")]
 
-# cold search volume & daily cases
-#setting colour
-searchcolour <- "#00c7c6"
-dailycasecolour <- "#ff0000"
+corr2 <- cor(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method = 'pearson')
+corr2
 
-ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=daily_cases, col = "Daily Cases")) +
-  geom_line(aes(y=cold*30, col = "Searches for 'cold'")) +
-  labs(title="Daily Covid Cases & Search Volume for 'cold'", x = "Time")+
-  scale_y_continuous(
-    # Features of the first axis
-    name = "Cases per Day",
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(trans=~./30*10000, name="Search Volume"))+
-  theme(legend.position="right", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = searchcolour),
-        axis.title.y.left = element_text(color = dailycasecolour))
+#Pearson's correlation test
+cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
+
 
 ```
 
@@ -879,5 +930,7 @@ ggplot(search_patient[date >= "2019-12-20" & date < "2020-05-01"], aes(x=date)) 
 * Both the search term "coronavirus" and "cold" show partial similarity in its course with the daily confirmed cases (e.g. strong increase in mid-February).
 * The gradual increase of the search term "flu" starting in October 2019 could be an indicator of the first (not-tested) covid cases. But there is further investigation needed to differentiate the data from the annual flu-season.
 
+**Discussion**
 
+**Interpretation**
 

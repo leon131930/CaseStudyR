@@ -114,7 +114,7 @@ ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-08")],aes(x=date)) +
         axis.title.y.left = element_text(color = churchcolour))
 
 
-#calculate observed correlation (daily cases vs churchcases) 
+#calculate observed correlation (daily cases vs churchcases), for a time period of start of church-cases until 10 days later
 merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-28")]
 
 corr2 <- cor(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method = 'pearson')
