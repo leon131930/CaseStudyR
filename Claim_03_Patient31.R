@@ -19,6 +19,14 @@ time <- fread("./extData/time.csv")
 case_old <- fread("./extData/Case.csv")
 region <- fread("./extData/Region.csv")
 
+# Creating copies from those dataframes for super spreader claim - now our claim 02
+case_02 <- copy(case)
+case_old_02 <- copy(case_old)
+patientinfo_02 <- copy(patientinfo)
+time_02 <- copy(time)
+region_02 <- copy(region)
+
+
 #####################
 #Let's first have a look at all the Covid-Cases spread throughout the country. Where there some
 #areas the cases were really high or was it a more "even" spread throughout the whole country?
@@ -34,17 +42,17 @@ head(south_korea.f)
 
 # Changing Case Data so we can map the longitudes and latitudes
 #subsetting to remove empty values (no coordinates)
-case <- case[longitude != "-"]
+case_02_withcoordinates <- case_02[longitude != "-"]
 
 # change data type from character to double
-case[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
+case_02_withcoordinates[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 head(case)
 
 # Plotting map of South Korea with different sized dots according to number of cases
 ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
-  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
+  geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
   coord_map() + labs(title = "Covid-Cases spread over South Korea")
 
 # Seems like there were two hotspots indeed! Probably some major cities? Seoul? Also we heard, that 
@@ -61,14 +69,15 @@ locations_seoul_church <- data.frame(Location = c("Seoul", "Shincheonji Church")
 ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
-  geom_point(data = case, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
+  geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases")) + 
   geom_text_repel(data = locations_seoul_church, aes(x = Longitude, y = Latitude, label = Location), 
                   fontface = "bold", nudge_x = c(1, -2), 
                   nudge_y = c(0.5, -0.5)) +
   coord_map() + labs(title = "Covid-Cases spread over South Korea")
 
 # Alright, around the location of the church there seemed to be a lot of cases. But this doesn't
-# nexessarily mean that those cases are actually all related to the church. Right?
+# necessarily mean that those cases are actually all related to the church. Could also be a highly
+# populated area where a lot of people from other countries travel to. Right?
 
 #####################
 
@@ -77,25 +86,15 @@ ggplot() +
 # infection reason caused by far the most infections?
 
 # aggregate confirmed cases so we can see which infection reason caused the most cases
-overview_infection_cases <- aggregate(x= case$confirmed,by= list(case$infection_case),FUN= sum)
+overview_infection_cases <- aggregate(x= case_02$confirmed,by= list(case_02$infection_case),FUN= sum)
 overview_infection_cases
 
 # Rename column names to make referencing easier
 overview_infection_cases <- overview_infection_cases %>% rename(infection_reason = Group.1,people_confirmed = x)
 overview_infection_cases
 
-# Determine top 15 reasons and plot them as a bar chart
-top_15_cases <- top_n(overview_infection_cases, 15, people_confirmed)
-top_15_cases
-
-ggplot(data = top_15_cases, 
-       aes(x=people_confirmed,
-           y=reorder(infection_reason,people_confirmed))) +
-  geom_bar(stat="identity", width = 0.7, fill = "lightblue") +
-  geom_text(aes(label=people_confirmed), hjust=-.1, color="black", size=3) +
-  labs(x="Number of Cases", y="Infection Reason", title = "Top 15 Infection Reasons")
-
-# Top 10 cases without "etc"
+# Drop etc cases because we cannot connect them to a specific reason & plot the top 10 cases 
+#without "etc"
 overview_infection_cases
 overview_without_etc <- overview_infection_cases[!(overview_infection_cases$infection_reason=="etc"),]
 
@@ -112,7 +111,7 @@ ggplot(data = top_10_cases_without_etc,
 
 ########################
 
-# Alright, seems like we actually found a bad guy Infection cases related to the Shincheonji
+# Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji
 # Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow"
 # Combined. Let's have a closer look at the Shincheonji Church Events. How did it start? And
 # how did it effect the following daily cases?
@@ -131,14 +130,14 @@ ggplot(data = top_10_cases_without_etc,
 #labs(x="Time", y="Cases per Day")
 
 # Graph showing total daily cases over time, patientinfo database
-patientinfo[, daily_cases := .N, by = confirmed_date]
+patientinfo_02[, daily_cases := .N, by = confirmed_date]
 total_cases_patientinfo <- ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) +
   geom_line(colour="black") + labs(x="Time", y="Cases per Day")
 total_cases_patientinfo
 
 # Graph showing total daily cases over time, time database, total cases in Korea per day
-time[,confirmed_date:=as.Date(date,"%d/%m/%y")]
-time[, confirmed_date:= as.IDate(confirmed_date)]
+time_02[,confirmed_date:=as.Date(date,"%d/%m/%y")]
+time_02[, confirmed_date:= as.IDate(confirmed_date)]
 total_cases_time <- ggplot(time, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black")+
   labs(x="Time", y="Cases per Day")
 total_cases_time
@@ -154,93 +153,97 @@ ggarrange(total_cases_patientinfo, total_cases_time, ncol=2, nrow=1)
 # Combined. Let's have a closer look at the Shincheonji Church Events. How did it start? And
 # how did it effect the following daily cases?
 
-#Include sidenote, that Patientinfo is a representable subset of time dataset (is it though?)
-ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
-  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), colour="red") +
-  geom_vline(data = subset(locations_seoul_church, Location=="Shincheonji Church"),
-             aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020)")) +
-  geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
-             aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020")) +
-  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
-  theme(legend.position="bottom", legend.title = element_blank())
-
-#Okay that looks like a lot of people that were infected within this church. But is this seriously
-#traceable back to only one person? Isn't it possible that there were like 5-10 infected people?
-
-#Well, let's see whether we are able to trace back all the connections that were infected
-#by patient 31, shall we?
-
-
-
-
-
-
-
-##########################
-# But why did it start in the church in the first place? Was there one certain trigger?
-# In the news everyone is talking about this mysterious patient 31, are we able to find her?
-
-# Look for the first patient infected by Covid-19 that was associated with the Shincheonji Church
-# Are we able to find the 60 year old something patient number 31 the news talk about?
-df = subset(patientinfo, select = -c(country, province))
-latest_dates <- df %>% group_by(infection_case) %>% top_n(1, confirmed_date)
-earliest_dates <- setDT(df)[, .SD[which.min(confirmed_date)], by = infection_case]
-
-#let's look for the row with the min value for the Shincheonji church
-earliest_dates %>% filter(infection_case == "Shincheonji Church")
-#turns out we are! Patient Number 31, in her 60s was diagnosed with Covid on Tuesday, 18th Feb 2020
-#and she has an insane amount of contact numbers! No wonder Shincheonji Church cases were so
-#high... imagine those 1160 contacts infecting even more people!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Create a data table with the main spreader events
+# ADD SOURCE FOR CHURCH EVENT AND DELETE NOT NEEDED ASPECTS (NON CHURCH EVENTS)
+# MENTION NEW YORK TIMES
 super_spreader <- data.table(Event_Name= c("Itaewon Club", "Richway", "Guro-gu Call Center", "Shincheonji Church", "Coupang Logistics Center"), 
                              Date=c("2020-05-01", "2020-06-01", "2020-03-05", "2020-02-16", "2020-05-20"))
 # Convert Date column as date, so we can use it in one graph with our Patientinfo & daily cases
 super_spreader[, Date:=as.Date(Date)]
 
-# Look for the first patient infected by Covid-19 that was associated with the Corona virus
-# Are we able to find the 60 year old something patient number 31?
-df = subset(patientinfo, select = -c(country, province))
-latest_dates <- df %>% group_by(infection_case) %>% top_n(1, confirmed_date)
-earliest_dates <- setDT(df)[, .SD[which.min(confirmed_date)], by = infection_case]
 
+# Include sidenote, that patientinfo is a representable subset of time dataset (is it though?)
+# ALSO INCLUDE LEGEND AND FIGURE OUT HOW THE HECK YOU CAN INTEGRATE COLOURS IN A NICE WAY
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
+  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), colour = "red") +
+  labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
+  theme(legend.position="bottom", legend.title = element_blank())
+
+# Ok, seems like the church actually had a serious impact especially at the beginning.
+# But why did it start in the church in the first place? Was there one certain trigger?
+
+# Look for the first patient infected by Covid-19 that was associated with the Shincheonji Church
+df_church = subset(patientinfo_02, select = -c(country, province))
+latest_dates <- df_church %>% group_by(infection_case) %>% top_n(1, confirmed_date)
+earliest_dates <- setDT(df_church)[, .SD[which.min(confirmed_date)], by = infection_case]
+
+# In the news everyone is talking about this mysterious patient 31, are we able to find her?
 #let's look for the row with the min value for the Shincheonji church
 earliest_dates %>% filter(infection_case == "Shincheonji Church")
+
 #turns out we are! Patient Number 31, in her 60s was diagnosed with Covid on Tuesday, 18th Feb 2020
+#and she has an insane amount of contact numbers! No wonder Shincheonji Church cases were so
+#high... imagine those 1160 contacts infecting even more people!
 
-#Let's dive a bit deeper and plot the Daily Covid cases associated with the Church against the
-#overall daily cases
-
-#Include sidenote, that Patientinfo is a representable subset of time dataset (is it though?)
-ggplot(data = patientinfo, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
-  geom_line(data = subset(patientinfo, infection_case=="Shincheonji Church"), colour="red") +
+# Let's quickly plot this over time and see when patient 31 was going to the church and at what point
+# she was diagnosed.
+# DOUBLE-CHECK HOW TO MINIMIZE THIS TO ONLY FEB + MARCH
+ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(colour="black") +
+  geom_line(data = subset(patientinfo_02, infection_case=="Shincheonji Church"), colour = "red") +
   geom_vline(data = subset(super_spreader, Event_Name=="Shincheonji Church"),
-             aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020)")) +
+             aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020) - acc. to NY Times")) +
   geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
              aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020")) +
   labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Covid-Outbreak") +
   theme(legend.position="bottom", legend.title = element_blank())
+  
+# Seems like one person can kick-start something really large real quick.. and not in a good way!
+# Let's have a closer look at the people patient number 31 infected.
+# Is all of this drama seriously traceable back to one person?
+earliest_dates %>% filter(infection_case == "Shincheonji Church")
+# Ok 1160 people is a huge number. How does this compile though?
+# We cannot show all 1160 contacts. We can only use the patientinfo table and a total of 17
+# people were infected by patient number 1200000031
+sum(patientinfo_02$infected_by=="1200000031")
 
-#Okay that looks like a lot of people that were infected within this church. But is this seriously
-#traceable back to only one person? Isn't it possible that there were like 5-10 infected people?
+# Let's try to compile a network visualization showing the the 17 people that were infected by
+# patient number 31 also infected additional people themselves
 
-#Well, let's see whether we are able to trace back all the connections that were infected
-#by patient 31, shall we?
+
+
+
+
+# And also, people travel, you know? While I am not able to show you concrete locations that
+# people where tested positive at, I am able to show you how many people were tested positive
+# in regions that were not Daego but still related to the virus
+# SHOW SIMPLE GRAPH HOW MANY PEOPLE TURNED UP IN OTHER REGIONS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  colors_claim02 <- c("Shinchoenji Church related" = "red", 
+                      "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020)" = "red",
+                      "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020" = "blue")
+
+
+
+# HOWEVER: there is no way of knowing whether there wasn't a 2nd, 3rd or 4th person infected at
+# at that church event that simply wasn't tested positive or didn't get tested at all. So it is
+# not really possible to "blame" all on this one women in her 60s.
+###############################
 
 #how many people were infected by patient 31
 flights[, .N, by = 'AIRLINE']
