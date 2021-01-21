@@ -111,7 +111,8 @@ merge_GermanyUS <- merge(RKI_data_UsFormat, time,
 # plot
 plot_germany <- ggplot(merge_GermanyUS, aes(x=confirmed_date)) + 
   geom_line(aes(y=`daily_cases`,color="South Korea"))+
-  geom_line(aes(y=`Anzahl COVID-19-Faelle pro Tag`,color="Germany")) + 
+  geom_line(aes(y=`Anzahl COVID-19-Faelle pro Tag`,color="Germany")) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
   labs(x= "Time", y="Cases per Day",title="Daily Cases: South Korea vs. Germany") + 
   scale_color_manual(values=c( "orange", "black", "blue","red"))+
   theme(legend.position="bottom") +
@@ -125,19 +126,19 @@ plot(plot_germany)
 
 
 * After a massive increase in the number of daily cases in South Korea, one can observe that these numbers decline remarkably in a short time period and continued to stay on a constant low level.
-* Germany on the other hand struggled with a multiple of daily cases and these numbers remained on a high level for a longer time period, before dropping again. 
-* Both countries Germany and South Korea are considered industry nations, thus we can assume that there is at least a small similarity in terms of life quality, infrastructure, health care system, etc. However, Korea has more than twice the number of inhabitants per km² and still had low number of infection cases. Therefore, it seems interesting to further investigate what happened in South Korea. 
+* Germany on the other hand struggled with a multiple of daily cases and these numbers remained on a high level for a longer time period before dropping again. 
+* Both countries Germany and South Korea are considered as industry nations, thus we can assume that there is at least a small similarity in terms of life quality, infrastructure, health care system, etc. However, South Korea has more than twice the number of inhabitants per km² and still showed low numbers of infection cases. Therefore, it seems interesting to further investigate what happened in South Korea. 
 
 
 <p>&nbsp;</p>
 
 
 ## Claim 01 
-#### By imposing a multitude of different types of policies, the government of South Korea had reduced the number of daily infection cases.
+#### By imposing a multitude of different types of policies, the government of South Korea managed to reduce the number of daily infection cases.
 
 **Our initial motivation:**
 
-* The general development of number of daily cases in in South Korea in terms of the low peak and the short time frame of high level of daily cases seems interesting. Especially, the wide range of different types of introduced policies from the government is remarkable. 
+* South Korea generally showed  covid cases of much lower level (compared to Germany). In addition, South Korea was able to drastically reduce its number of daily covid cases from its peak end of February. As social-distancing policies are known to be a global measure to contain the spread of the virus, we investigate their influence of policies on the course of the pandemic in South Korea.
 
 **Claim description in more detail:**
 
@@ -145,8 +146,8 @@ plot(plot_germany)
 
 **Our approach:**
 
-* First, we inspect the different types of policies and when they were imposed from the government during the period from January 2020 to July 2020. 
-* Then, we show an example of imposed policies in the areas administration, education and social area to outline the overlap of different policies within the same time period. 
+* First, we inspect the different types of policies and when they were imposed by the government during the period from January to July 2020. 
+* Then, we show an example of imposed policies in the areas of administration, education and society to outline the overlap of different policies within the same time period. 
 * Finally, we inspect whether there is a significant association between the number of policies and the development of the number of daily infection cases.
 
 <p>&nbsp;</p>
@@ -175,7 +176,7 @@ plot_polDistribution <- ggplot(policyDay, aes(x = start_date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_bar() +
   labs(x = "Time", y = "Number of Policies",
-       title="Start of the different Policies")+
+       title="Start Date of Policies")+
   theme(legend.position="none") +
   geom_text(aes(label=stat(count)), stat = "count", vjust = -0.5)
 
@@ -185,11 +186,11 @@ ggarrange(plot_nbPolicies, plot_polDistribution, ncol=2, nrow=1)
 
 **Short Analysis**
 
-* In total, 61 policies were introduced by the government of South Korea during the time period from January 2020 to June 2020.
+* In total, 61 policies were introduced by the government of South Korea during the time period from January to June 2020.
 
-* The number of immigration and education policies dominate the other policies. This is related to the fact that immigration policies are counted for each country and education policies for each school type.
+* The number of immigration and education policies dominate other policies. This is due to the fact that immigration policies are counted for each country and education policies for each school type.
 
-* Shortly after the number of infection cases surged the government of South Korea reacted with numerous policies in all kind of area. The many policies in the middle of April are related to the online-school opening policies that all took place at once for each type of school.
+* Shortly after the number of infection cases surged the government of South Korea reacted with numerous policies in all kinds of areas. Many policies in the middle of April result from online-school opening policies that all took place at once for each type of school.
 
  
 <p>&nbsp;</p>
@@ -229,7 +230,7 @@ ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
   geom_rect(aes(xmin=as.Date('2020-02-29'),xmax=as.Date('2020-04-19'),
                 ymin=840,ymax=843,color="Strong social\ndistancing campaign"))+
   geom_text(aes(x = as.Date('2020-02-29'), 
-                y = 850, label = "Strong Social distancing campaign"),
+                y = 850, label = "Strong social distancing campaign"),
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
   geom_rect(aes(xmin=as.Date('2020-04-19'),xmax=as.Date('2020-06-30'),
@@ -257,15 +258,17 @@ ggplot(time_copy, aes(x=confirmed_date, y=daily_cases)) + geom_line() +
             size = 3, vjust = 0, hjust = 0, color = "black")+
   
   labs(x = "Time", y = "Cases per Day",
-       title="Start and End of Administrative / Education / Social Policies")+
-  theme(legend.position="none") 
+       title="Start/End of Administrative, Education & Social Policies")+
+  theme(legend.position="none") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
 
 ```
 
 **Short Analysis**
 
-* After the number of daily cases have reached peak in March, numerous policies with the aim of social distancing, such as delaying school start, were introduced. It seems that through these policies the number of daily cases could be reduced. (Note: the figure above only displays a fraction of policies!)
-* In the beginning of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced closed. It seems that through that another severe outbreak was prevented.
+* After the number of daily cases have reached peak end of February, numerous policies with the aim of social distancing, such as delaying school start, were introduced. It seems that these policies helped reducding the number of daily cases.
+(Note: the figure above only displays a fraction of policies)
+* In the beginning of May, after the number of daily cases tended to increase again, further public indoor gathering places were forced to close.
 
 <p>&nbsp;</p>
 
@@ -309,7 +312,7 @@ ggplot(merge_CasesMeasures, aes(x = date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y") +
   geom_line(aes(y=`daily_cases`, col = "Daily Cases")) +
   geom_line(aes(y=`cumulativeNumbers` * 8,col = "Cum. Policies")) + 
-  labs(title="Daily Cases and Number of Policies", x = "Time") +
+  labs(title="Daily Cases vs. Number of Policies", x = "Time") +
   scale_y_continuous(name = "Cases per Day",
   # Add a second axis, with a scale / 8
   sec.axis = sec_axis(~./ 8, name="Number of cum. Policies")) +
@@ -320,10 +323,10 @@ ggplot(merge_CasesMeasures, aes(x = date)) +
 
 **Short Analysis**
 
-* The number of active policies increased heavily when the number of daily cases rose to its peak in March and kept increasing until June
-* However, as the figure shows, some policies were also remove again.  
+* The number of active policies increased heavily when the number of daily cases rose to its peak end of February and kept increasing until June
+* However, as the figure shows, some policies were also removed again.  
 * What is striking is that there seems to be a lag between the introduction of new policies and its assumed causing effect in terms of reduced daily cases. 
-* Therefore, we first inspect the Pearson correlation between those variables before having a closer look into the cross-correlation to gain further insights.
+* Therefore, we first inspect the Pearson correlation between both variables before having a closer look at the cross-correlation to gain further insights.
 * We use the Pearson correlation throughout both tests as our variables "Daily Cases" and "Number of Policies" are of quantitative nature and we presume a linear relationship between those variables. Furthermore, we see no indication for considerable outliers that could distort the results.
 
 
@@ -338,9 +341,9 @@ cor.test(merge_CasesMeasures$cumulativeNumbers,
 
 **Interpretation:**
 
-* We presume that there is no correlation between the variables "Daily Cases" and "Number of Policies" which therefore is our null hypothesis and test on the common significance level of alpha = 0.05. As commonly done, we use the double-sided hypothesis test
-* As result we get the Person Correlation of -0.2 which indicates a low negative correlation between "Daily Cases" and "Number of Policies", meaning that more policies result in lower number of daily cases.
-* The p-value is ~ 0.0, meaning the probability of obtaining test results at least as extreme as the results actually observed, under the assumption that the null hypothesis is correct.
+* We presume that there is no correlation between the variables "Daily Cases" and "Number of Policies" (null hypothesis) and test on the common significance level of alpha = 0.05. As the direction of correlation is unknown, we use the double-sided hypothesis test.
+* As result we get a Pearson correlation of -0.2 which indicates a low negative correlation between "Daily Cases" and "Number of Policies", meaning that more policies result in lower number of daily cases.
+* The p-value is ~ 0.0, meaning the probability of obtaining test results at least as extreme as the results actually observed under the assumption that the null hypothesis is correct.
 * So we reject our Ho and can conclude that there might be a correlation between those variables but based on our results we cannot be certain.
 
 <p>&nbsp;</p>
@@ -357,25 +360,26 @@ ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, m
 
 **Interpretation:**
 
-* For the cross correlation we again test with the Pearson Correlation and therefore have the same assumptions as described earlier. 
+* For the cross-correlation we again test with the Pearson correlation and therefore have the same assumptions as described earlier. 
 * The blue dashed lines show the boundaries of the 95% confidence interval.
-* For a lag of 0 we obtain the same results already shown in the our test above.
+* For a lag of zero we obtain the same results as already shown in our test above.
 * However, as can be seen, the negative correlation increases from ~ -0.2 at lag 0 up to ~ -0.6 at lag -33.
-* This indicates that an above average value of policies is likely to lead to a below average value of daily cases about 30 days later.  
+* This indicates that increased number of policies are likely to lead to decreased number of daily cases about 30 days later.  
 
 **Discussion:**
 
 * By testing the correlation between the variables "Daily Cases" and "Number of Policies" we wanted to show that a significant relationship between those two variables exists.
-* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation between those two variables.  
-* However, we need to take into account that there are multiple active policies in the same time period and also across different areas. The first two figures presented in this claim show the type of different introduced policies and their start dates while the following figure examplifys the overlap of various polices. Therefore, it is not possible to reduce the effect of declining number of daily cases to one or even a type of policies. 
+* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation for a time lag of ~ 1 month.  
+* However, we need to take into account that there are multiple active policies in the same time period and also across different areas. The first two figures presented in this claim show the type of different introduced policies and their start dates while the following figure examplifies the overlap of various polices. Therefore, it is not possible to reduce the effect of declining number of daily cases to one or even a type of policies. 
 * Furthermore, there is need to consider various other possible impacts that could have caused this relationship.
-* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers. 
+* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers.
 
 
 <p>&nbsp;</p>
 
 ## Claim 02
 #### The superspreader event in the Shincheonji Church in Feb. 2020 was the number one reason the Covid cases in South Korea turned out to be so intense in the first place.
+####[ALTERNATIVE CLAIM]: Superspreader events did spread the virus geographically across many regions of South Korea
 
 **Our initial motivation:**
 
