@@ -489,7 +489,8 @@ church_cases_overtime <- ggplot() + geom_line(data = patientinfo_02,
             aes(x=confirmed_date, y= dailychurchcases, colour = "red")) +
   labs(x="Time", y="Cases per Day", title = "Shincheonji vs. Overall Daily Cases over Time") +
   scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Shincheonji Church related Cases")) +
-  theme(legend.position="bottom", legend.title = element_blank())
+  theme(legend.position="bottom", legend.title = element_blank())+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
 ```
 
 ```{r  echo=FALSE}
@@ -578,9 +579,10 @@ church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_0
   geom_vline(data = super_spreader_church,
              aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020) - acc. to NY Times")) +
   geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
-             aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020")) +
+             aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020)")) +
   labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Church Outbreak") +
-  theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())
+  theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
 ```
 
 ```{r  echo=FALSE}
@@ -918,14 +920,15 @@ As the permutation plot shows, it is very unlikely that our observed correlation
 **Short Discussion:**
 Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
 
+
 **Investigating confounding variables:**
 But could there by an additional confounding variable distorting above result?
 Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
 if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
 
 We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
-Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total daily cases) and calculate the pearson correlation.
-Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the pearson correlation test:
+Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total daily cases) and calculate the Pearson correlation.
+Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test:
 
 <p>&nbsp;</p>
 
@@ -950,13 +953,13 @@ merged_dt2 <- merge(timecs, patientinfocs, by = "date", all = TRUE)
 #plot Shincheonji church related cases and (total) daily cases, using two y-axis to better visualize the course
 ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-08")],aes(x=date)) +
   scale_x_date(date_breaks = "2 day", date_labels = "%d.%m")+
-  geom_line(aes(y=daily_cases/20, col = "daily cases")) +
-  geom_line(aes(y=(dailychurchcases), col = "Shincheonji church daily cases")) +
+  geom_line(aes(y=daily_cases/20, col = "Cases per Day")) +
+  geom_line(aes(y=(dailychurchcases), col = "Shincheonji Church Cases per Day")) +
   scale_color_manual(values=c(dailycasecolour, churchcolour))+
-  labs(x="Time", title="Shincheonji church daily cases vs. total daily cases")+
+  labs(x="Time", title="Shincheonji Church Daily Cases vs. Total Cases per Day")+
   scale_y_continuous(
-    name = "Shincheonji church daily cases",
-    sec.axis = sec_axis(trans=~.*20, name="daily cases",labels = scales::comma))+
+    name = "Shincheonji Church Cases per Day",
+    sec.axis = sec_axis(trans=~.*20, name="Cases per Day",labels = scales::comma))+
   theme(legend.position="bottom", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = churchcolour))
@@ -974,7 +977,7 @@ cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 Above results show no significant association of both variables; we can not reject the null hypothesis of not correlated data.
 
 **Interpretation**
-...
+
 
 
 
