@@ -893,13 +893,14 @@ As the permutation plot shows, it is very unlikely that our observed correlation
 **Short Discussion:**
 Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
 
-But could there by an additional confounding variable distorting this result?
-Considering there have been superspreader events in the beginning of the pandemic, 
+**Investigating confounding variables:**
+But could there by an additional confounding variable distorting above result?
+Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
+if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
 
-
-Given t
-We finally investigate a possible confounding variable
-
+We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
+Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total daily cases) and calculate the pearson correlation.
+Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the pearson correlation test:
 
 <p>&nbsp;</p>
 
@@ -935,7 +936,6 @@ ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-08")],aes(x=date)) +
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = churchcolour))
 
-
 #calculate observed correlation (daily cases vs churchcases), for a time period of start of church-cases until 10 days later
 merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-28")]
 
@@ -944,13 +944,16 @@ corr2
 
 #Pearson's correlation test
 cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
-
-
 ```
 
-**Short Analysis**
-
-**Discussion**
+Above results show no significant association of both variables; we can not reject the null hypothesis of not correlated data.
 
 **Interpretation**
+
+
+
+
+
+
+
 
