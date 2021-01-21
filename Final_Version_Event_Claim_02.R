@@ -201,6 +201,11 @@ ggplot(data = patientinfo_02, aes(x=confirmed_date, y=daily_cases)) + geom_line(
 # Like obviously 1160 contacts is HUGE, but if this happens in one city it doesn't necessarily mean
 # that the whole outbreak was caused by this one event, does it?
 
+# NOTE: we were trying to do some Networking clustering however due to the fact that we are only able
+# to trace back a total number of 17 people to patient Number 31 via the patientinfo datatable, we
+# focused on the spread throughout the country.
+sum(patientinfo_02$infected_by == "1200000031")
+
 # Well, people travel, you know? Let's have a look how many people related to the Church were 
 # tested positive for Covid in regions far away from the Church
 
