@@ -98,21 +98,6 @@ ggplot(merged_dt2[date %between% c("2020-02-15", "2020-03-10")],aes(x=date)) +
         axis.title.y.left = element_text(color = churchcolour))
 
 
-#with patientinfo data
-ggplot(patientinfocs[date %between% c("2020-02-15", "2020-03-10")],aes(x=date)) +
-  scale_x_date(date_breaks = "1 month", date_labels = "%m-%d")+
-  geom_line(aes(y=daily_cases/17, col = "total daily confirmed cases")) +
-  geom_line(aes(y=(dailychurchcases), col = "daily cases from churches")) +
-  scale_color_manual(values=c(churchcolour, dailycasecolour))+
-  labs(x="Calendar week 2020", title="Daily covid cases in churches vs total")+
-  scale_y_continuous(
-    name = "daily cases from churches",
-    sec.axis = sec_axis(trans=~.*17, name="total daily confirmed cases",labels = scales::comma))+
-  theme(legend.position="bottom", legend.title = element_blank(), 
-        axis.title.y.right = element_text(angle=90, color = dailycasecolour),
-        axis.title.y.left = element_text(color = churchcolour))
-
-
 #calculate observed correlation (daily cases vs churchcases) 
 merged_dt2 <- merged_dt2[date %between% c("2020-02-18", "2020-02-28")]
 
