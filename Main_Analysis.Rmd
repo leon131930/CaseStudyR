@@ -718,8 +718,8 @@ final_map_plot
 * However, one cannot say for sure, that the church was the main reason for the severe Covid outbreak in South Korea. There are simply too many other variables that could have influenced this. For one, there were multiple spreader events, not only the church one (see the bar chart "Top 10 Infection Reasons").
 * Additionally, we do not know for sure, that patient number 31 was the only person infected at that church event. While she was the first one to be tested positive we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that simply wasn't tested positive or didn't get tested at all.
 
-To sum it up, YES, the church event had an impact on the Covid spread in South Korea. We can confirm, that the Shincheonji Church event was one reason that ultimately led to skyrocketing cases in the country. Especially the fact that people that got infected at the church event traveled to different regions caused the Shincheonji Church to not only have a local but a nation-wide impact. And thus, we are able confirm our claim. 
-However, we would **not** be able to confirm that the superspreader event was one of the main reasons for the outbreak. So the picture that was communicated in the local as well as international media may not be accurate.
+* To sum it up, YES, the church event had an impact on the Covid spread in South Korea. We can confirm, that the Shincheonji Church event was one reason that ultimately led to skyrocketing cases in the country. Especially the fact that people that got infected at the church event traveled to different regions caused the Shincheonji Church to not only have a local but a nation-wide impact. And thus, we are able confirm our claim. 
+* However, we would **not** be able to confirm that the superspreader event was one of the main reasons for the outbreak. So the picture that was communicated in the local as well as international media may not be accurate.
 <p>&nbsp;</p>
 
 
@@ -767,7 +767,8 @@ ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu
 
 <p>&nbsp;</p>
 
-As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for outlier. Therefore, it seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer to apply the Spearman correlation test.
+* As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for outlier. Therefore, it seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. 
+* Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer to apply the Spearman correlation test.
 
 
 <p>&nbsp;</p>
@@ -790,7 +791,7 @@ ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
 
 <p>&nbsp;</p>
 
-Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the two variables can be seen.
+* Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the two variables can be seen.
 
 <p>&nbsp;</p>
 
@@ -808,8 +809,8 @@ p_value
 
 **Interpretation:**
 
-The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
-As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
+* The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
+* As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
 
 
 **Discussion:**
@@ -940,7 +941,7 @@ As the permutation plot shows, it is very unlikely that our observed correlation
 Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
 
 
-**Investigating confounding variables:**
+**Investigating Confounding Variables:**
 But could there be an additional confounding variable distorting above result?
 Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
 if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
