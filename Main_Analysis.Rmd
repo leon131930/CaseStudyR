@@ -717,24 +717,17 @@ To sum it up, YES, the Church Event had a serious impact on the Covid spread in 
 
 **Our initial motivation:**
 
-* Concerning other viruses it is often said that the temperature level has an significant impact on the daily number of infection cases.
-So it is reasonable to inspect whether this is also true for COVID-19.
+* Concerning other viruses it is often said that the temperature level has a significant impact on the daily number of infection cases.
+Thus it is reasonable to inspect whether this is also true for COVID-19.
 
 **Claim description in more detail:**
 
-* Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we consider the daily cases and average temperature of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.  
+* Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we look at the data of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.  
 
 **Our approach:**
 
-* First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
-Ho : r = 0. Furthermore, we use the commonly used significance level of alpha = 0.05. Therefore, we will reject Ho if the p-value is below 0.05.
-
-**Discussion**
-
-* It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases are independent of the temperatur level.
-* Other circumstances, like super spreader events, distort the number of infection cases and thus may obscure a possible association between temperature level and number of infection cases.
-
-
+* First, we plot the existing data as scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our hypothesis. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
+Ho : r = 0. We use the commonly used significance level of alpha = 0.05, meaning that we will reject Ho if the p-value is below 0.05.
 
 <p>&nbsp;</p>
 
@@ -754,16 +747,16 @@ timeProvince[, date:= as.IDate(date)]
 melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 
 # Plot data: avg weather
-ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "remaining provinces")))+geom_point() +
-  labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation: Avg. Temperature vs. Daily Cases (all provinces)") +
+ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "Remaining Provinces")))+geom_point() +
+  labs(x = "Average Temperature in °C", y = "Cases per Day", 
+       title = "Relation: Avg. Temperature vs. Daily Cases (all Provinces)") +
   theme(legend.title=element_blank()) 
 
 ```
 
 <p>&nbsp;</p>
 
-As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for an outlier. Therefore, it is seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer the Spearman correlation test.
+As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for outlier. Therefore, it seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer to apply the Spearman correlation test.
 
 
 <p>&nbsp;</p>
@@ -777,8 +770,8 @@ melted_dt_without_Daegu = melted_dt[province!='Daegu']
 # Plot data: avg weather
 ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
   geom_smooth(method = "loess") +
-  labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation: Avg. Temperature vs. Daily Cases (without Daegu)") +
+  labs(x = "Average Temperature in °C", y = "Cases per Day", 
+       title = "Relation: Avg. Temperature vs. Daily Cases (without Daegu Province)") +
   theme(legend.title=element_blank()) 
 
 
@@ -807,10 +800,17 @@ p_value
 The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
 As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
 
+
+**Discussion**
+
+* It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases is independent of the temperature level.
+* Other circumstances, like super spreader events, distort the number of infection cases for individual regions and thus may obscure a possible association between temperature level and number of infection cases.
+
+
 <p>&nbsp;</p>
 
 ## Claim 04
-#### Search data is related to the development of daily cases, thus could function as predictor for future outbreaks
+#### Search data is associated with the development of daily cases
 
 **Our initial motivation:**
 
@@ -820,13 +820,13 @@ It might thus be interesting to investigate factors which can possibly predict f
 
 **Claim description in more detail:**
 
-* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after the onset of symptoms. It should thus be explored whether search data is linked to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
+* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after their onset of symptoms. It should thus be explored whether search data is related to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
 
 **Our approach:**
 
 * To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus". As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
 As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
-After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases. Finally we apply the pearson tests for correlation to reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
+After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases. Finally we apply the Pearson correlation test to possibly reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
 
 <p>&nbsp;</p>
 
@@ -846,21 +846,21 @@ churchcolour <- "#9400D3"
 #plot search volume and daily cases, using two y-axis because of relative values of searchtrend table
 ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=(coronavirus), col = "Relative search volume")) +
-  geom_line(aes(y=daily_cases/8, col = "Daily confirmed cases")) +
+  geom_line(aes(y=(coronavirus), col = "Relative Search Volume")) +
+  geom_line(aes(y=daily_cases/8, col = "Cases per Day")) +
   scale_color_manual(values=c(dailycasecolour,searchcolour))+
-  labs(x="Time", title="Daily covid cases & relative search volume for 'coronavirus'")+
+  labs(x="Time", title="Cases per Day & relative Search Volume for 'coronavirus'")+
   scale_y_continuous(
-    name = "relative search volume",
-    sec.axis = sec_axis(trans=~.*8, name="daily confirmed cases",labels = scales::comma))+
+    name = "Relative Search Volume",
+    sec.axis = sec_axis(trans=~.*8, name="Cases per Day",labels = scales::comma))+
   theme(legend.position="bottom", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = searchcolour))
 ```
 Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time.
-To account for the different units of both variables, use a second y-axis.
+To account for the different units of both variables, we use a second y-axis.
 It can be deduced that the course of both variables is quite similar.
-We therefore calculate the pearson correlation:
+We therefore calculate the Pearson correlation:
 
 <p>&nbsp;</p>
 
@@ -871,21 +871,21 @@ corr1 <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
 corr1
 
 ```
-To account for the time lag we see in above plot, we calculate the cross correlation:
+Referring to the time-lag described in our motivation of this claim, we calculate the cross-correlation:
 
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
-#Using Cross correlation to show that search cases can indicate covid cases
+#Using Cross-correlation to show that search cases can indicate covid cases
 # -> Shows high correlation (0.92) for a time lag of 6 days
 ccfvalues1 <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily cases", plot = TRUE)
 ccfvalues1
 ```
 
-The cross correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
+The cross-correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
 meaning that an increase of searches best reflects increased number of daily cases six days later, with a strong positive correlation.
 
-Given those indicative results, we apply the pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
+Given those indicative results, we apply the Pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
 
 <p>&nbsp;</p>
 
@@ -930,13 +930,14 @@ Above results suggest that internet searches for "coronavirus" indicate future c
 
 
 **Investigating confounding variables:**
-But could there by an additional confounding variable distorting above result?
+But could there be an additional confounding variable distorting above result?
 Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
 if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
 
 We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
-Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total daily cases) and calculate the Pearson correlation.
-Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test:
+Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total cases per day) and calculate the Pearson correlation.
+Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test.
+As the covid outbreak in Shincheonji church was a one-time event, we only take confirmed cases until ten days after the event (18.02-28.02.) into our calculation:
 
 <p>&nbsp;</p>
 
@@ -982,9 +983,22 @@ corr2
 cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 ```
 
-Above results show no significant association of both variables; we can not reject the null hypothesis of not correlated data.
+Above results show no significant association of both variables; we cannot reject the null hypothesis of not correlated data.
 
-**Interpretation**
+
+**Discussion**
+
+Overall, the available search data and its correlation to covid cases seems to be a promising factor to be applied for predictions of covid cases.
+However, as South Korea quickly accelerated its testing capacities, our calculated time gap of 6 days might not be valid under those circumstances.
+
+Also, it is worth mentioning that Google previously tried simulating infectious diseases like the flu based on Google Search data, which turned out to be unsuccessful.
+Therefore one should be very careful in generalizing our findings.
+
+Further research on this should be done for countries with a second wave of covid cases in a setup of well-developed testing capacities.
+
+
+
+
 
 
 
