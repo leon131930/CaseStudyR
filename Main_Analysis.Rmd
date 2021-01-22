@@ -136,15 +136,15 @@ plot(plot_germany)
 ## Claim 01 
 #### By imposing a multitude of different types of policies, the government of South Korea managed to reduce the number of daily infection cases.
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
 * South Korea generally showed  covid cases of much lower level (compared to Germany). In addition, South Korea was able to drastically reduce its number of daily covid cases from its peak end of February. As social-distancing policies are known to be a global measure to contain the spread of the virus, we investigate their influence of policies on the course of the pandemic in South Korea.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
 * As the number of infection cases in South Korea increased heavily, the government became more active in terms of introducing new restricting policies across all areas of life with the aim to decrease the number of daily infection cases.
 
-**Our approach:**
+**Our Approach:**
 
 * First, we inspect the different types of policies and when they were imposed by the government during the period from January to July 2020. 
 * Then, we show an example of imposed policies in the areas of administration, education and society to outline the overlap of different policies within the same time period. 
@@ -379,22 +379,24 @@ ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, m
 
 ## Claim 02
 #### The superspreader event in the Shincheonji Church in Feb. 2020 was one reason the Covid cases in South Korea turned out to be so intense in the first place.
-####[ALTERNATIVE CLAIM]: Superspreader events did spread the virus geographically across many regions of South Korea
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
-* When Covid first reach South Korea the number of cases was relatively low. However, with the "mysterious" patient Number 31, the serious increase in daily cases in South Korea began. A lot of people worldwide including the local government blamed a Christian 'Cult' for this, since one member seemed to have spread the virus.
+* When plotting overall daily cases in South Korea over time one clearly sees that during the first couple of weeks the number of confirmed Covid cases remained relatively low. However, at some point in late February they skyrocketed.
+* We wanted to dive deeper into this "turning point". Since we have heard on the news multiple times that a lot of people worldwide including the local government blamed a Christian "cult" for the explosion of cases, we decided to take a closer look at this event in particular.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
-* Without this particular spreader event in the Shincheonji Church in February in Daegu the Covid-spread would have been seriously lower.
+* We are claiming, that without this particular spreader event in the Shincheonji Church in Daegu the Covid-spread would have been seriously lower.
 * In fact, one could argue that without this spreader event and - to be specific - without the attendance of the church event by patient number "1200000031" (following called Patient 31) the Covid-spread in South Korea wouldn't have been "serious" at all.
 
-**Our approach:**
+**Our Approach:**
 
-* In order to see, whether the public media was right, and the Church did indeed cause the first "serious" spread of the virus we first had a look at the Covid infections throughout South Korea that clearly indicated two main infection cluster.
-* We then had a closer look at the Church cases compared to the overall daily cases and dived a bit deeper into the starting point of the church cluster
-* Finally, we tried to understand how one local event can effect the whole country and created a map showing positively tested people related to the church traveling all over the country.
+* In order to see, whether the public media was right, and the church did indeed cause the first "serious" spread of the virus we first had a look at the Covid infections throughout South Korea.
+* Following we had a closer look at the church cases compared to the overall daily cases and dived a bit deeper into the starting point of the church cluster.
+* Finally, we analyzed if this local event actually effected the whole country. Therefore we plotted a map showing all the people that according to our data were related to the church but were tested positive for Covid in a different region than Daegu. 
+
+We start our analysis by first looking at the spread of Covid cases throughout the country. Where there some areas the cases were really high or was it a more "even" spread?
 
 <p>&nbsp;</p>
 
@@ -410,7 +412,6 @@ region_02 <- copy(region)
 ```{r echo = FALSE, message=FALSE}
 #Let's first have a look at all the Covid Cases spread throughout the country. Where there some
 #areas the cases were really high or was it a more "even" spread throughout the whole country?
-
 # Loading South Korea Data - not necessary here, bc we already do it at the beginning
 # south_korea <- getData("GADM", country = "South Korea", level = 1)
 
@@ -433,7 +434,7 @@ map_overall_cases <- ggplot() +
              alpha = 0.7) +
   scale_size_continuous(range = c(2, 5)) +
   coord_map() +
-  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
+  labs(title = "Confirmed Covid-Cases in South Korea", x="Longitude", y="Latitude")
 
 # Seems like there were two hot-spots indeed! Probably some major cities? Seoul? Also we heard, that
 # there was quite some rumor about a church-event causing the spread in South Korea. Could that
@@ -456,17 +457,17 @@ map_overall_cases_final <- ggplot() +
                   fontface = "bold", nudge_x = c(1, -2),
                   nudge_y = c(0.5, -0.5)) +
   coord_map() +
-  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
+  labs(title = "Confirmed Covid-Cases in South Korea", x="Longitude", y="Latitude")
 ```
 
 ```{r  echo=FALSE}
 map_overall_cases_final
 ```
  <p>&nbsp;</p>
-**Short Analysis**
+**Short Analysis:**
 
-* Seems like there were two hot-spots indeed! On around Seoul and one around the mysterious church event.
-* Let's have a closer look on this. How did the church related cases develop over time and did it have a significant impact on the overall daily cases?
+* Seems like there were two hotspots indeed! One around Seoul and one around the mysterious church event.
+* Let's have a closer look at this. How did the church related cases develop over time and did they have a significant impact on the overall daily cases?
 
 <p>&nbsp;</p>
 ```{r echo = FALSE, message=FALSE}
@@ -498,10 +499,13 @@ church_cases_overtime <- ggplot() + geom_line(data = patientinfo_02,
 church_cases_overtime
 ```
 <p>&nbsp;</p>
-**Short Analysis**
+**Short Analysis:**
 
-* Mhm... doesn't look that bad, does it? However, when we think about the fact that this is only one single event, the numbers are not that low at all...maybe the patientinfo table isn't showing the whole picture.
-* Also, in terms of time it still fits pretty well to the beginning of the first larger outbreak. Let's dive a bit deeper. There has to be a reason why everyone was going nuts about this one! Can we find the top 10 infection reasons?
+* At first it doesn't seem like the Shincheonji cases were such as big deal. Compared to the overall daily cases the number of church related cases was relatively low.
+* But when we think about the fact that this is only one single event, the numbers don't seem to be that low at all.
+* Still, this cannot be the reason everyone was so convinced the Shincheonji church was the bad guy. Maybe the dataset (= the patientinfo datatable) we used isn't showing the whole picture?
+* Also, at least in terms of the timeline the church event fits pretty well to the beginning of the first larger outbreak. 
+* Let's dive a bit deeper. There has to be a reason why everyone was going nuts about this one! Are we able find the top 10 infection reasons?
 
 <p>&nbsp;</p>
 
@@ -538,8 +542,8 @@ top_10_reasons
 **Short Analysis:**
 
 * Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow" combined.
-* Let's have a closer look at the beginning of the Shincheonji Church Events. How did it start? Was there a certain "trigger"?
-* XXXX
+* Let's have a closer look at the beginning of the Shincheonji Church case-outbreak. How did it start? Was there a certain "trigger"?
+* Let's look for the very first patient that was confirmed positive for Covid **and** was related to the Shincheonji Church. In the news they were talking about an elderly women... can this be confirmed with the help of our dataset?
 
 
 <p>&nbsp;</p>
@@ -557,9 +561,12 @@ patient_31 <- earliest_dates %>% filter(infection_case == "Shincheonji Church")
 
 ```{r  echo=FALSE}
 patient_31
-
 ```
-Turns out in fact Patient Number 31, in her 60s, was diagnosed with Covid on Tuesday, 18th Feb 2020 as the first person related to the Shincheonji Church and she has an insane amount of contact numbers. No wonder Shincheonji Church cases were so high... imagine those 1160 contacts infecting even more people!
+<p>&nbsp;</p>
+* Turns out in fact patient number 31, in her 60s, was diagnosed with Covid on Tuesday, 18th Feb 2020 as the first person related to the Shincheonji Church and she has an **insane** amount of contact numbers.
+* No wonder Shincheonji Church cases were so high... imagine those 1160 contacts infecting even more people!
+* Let's quickly plot this over time to get the whole picture and see on what day patient 31 was going to the church and at what point in time she was actually diagnosed. 
+<p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
 # Let's quickly plot this over time to get the whole picture and see when patient 31 was going to the
@@ -591,12 +598,13 @@ church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_0
 ```{r  echo=FALSE}
 church_cases_overtime_inclpatient31
 ```
-
+<p>&nbsp;</p>
 **Short Analysis:**
 
-* This fits the timeline and development of overall cases pretty well. However, it still doesn't provide a clear picture why the Church was blamed for the virus to go wild.
+* This fits the timeline and development of overall cases pretty well. 
+* However, it still doesn't provide a clear picture why the Church was blamed for the virus to go wild, does it?
 * Just because one event in Daegu results in an enormous amount of cases doesn't necessarily mean, that the whole country will be affected by this.
-* Did people travel outside of Daegu but where infected at the church by any chance?
+* Is there a way to determine, whether people that were infected with Covid at this particular church event did travel to a different city or region, basically "taking the virus with them"?
 
 <p>&nbsp;</p>
 
@@ -636,8 +644,9 @@ regions_outside_daegu_plot
 
 **Short Analysis:**
 
-* Alright, indeed a couple of people. Gyeongsangbuk-do is probably close to Daegu, causing the high amount of cases?
-* Are we able to plot this on a map showing where exactly this occurred?
+* Alright, indeed a couple of people were tested positive in a different regions than Dague but were still identified as "Shincheonji Church related". Thus indicating, that they travelled while beinf infected with the virus. 
+* Gyeongsangbuk-do has quite a large number of positive tested people that are related to the church. One could argue, that this probably is a region bordering Daegu.
+* Are we able to plot this on a map showing in what region exactly the church related people were tested positive for Covid?
 
 <p>&nbsp;</p>
 
@@ -695,36 +704,38 @@ final_map_plot <- ggplot() +
 final_map_plot
 ```
 
-**Short Analysis**
+**Short Analysis:**
 
-* While obviously the most cases related to the church occurred in Daegu or close to Daegu, this map shows pretty well that people infected with covid that were somehow related to that church event, appeared all over the country.
-* Thus, people traveling from Daegu to e.g. Seoul while being infected, might have cause the virus to spread even further. From that one outbreak in Daegu into the whole country - and maybe even further.
+* While obviously the most cases related to the church occurred in Daegu or close to Daegu, this map shows pretty well that positive tested people that were somehow related to that church event, appeared **all over the country**.
+* Thus, people traveling from Daegu to e.g. Seoul while being infected, might have cause the virus to spread. From that one outbreak in Daegu into the whole country - and maybe even further.
 
 <p>&nbsp;</p>
 
-**Discussion**
+**Discussion:**
 
-It seems like the event in the church indeed had significant effects on the Covid spread throughout South Korea and it highlights the importance of policies such as travel restrictions making sure that in case such an event happens, the infected people do not travel to a different location, taking the virus with them. However in terms of the claim one cannot say for sure, that the Church was the main reason for the severe Covid outbreak in South Korea. There are simply too many other variables that could have influenced this.
-For one, there were multiple spreader events, not only the Church one (see the Bar Chart "Top 10 Infection Reasons"). Additionally, we do not know for sure, that Patient Number 31 was the only person infected at that Church event. While she was the first one to be tested positive only person infected at that Church event. While she was the first one to be tested positive we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that simply wasn't tested positive or didn't get tested at all. And while the case datatable states that Patient 31 hat a total of 1160 contacts, we are only able to trace back a total of 17 direct connections via the patientinfo datatable.
+It seems like the event at the church indeed had significant effects on the Covid spread throughout South Korea.
+It highlights the importance of policies such as travel restrictions that are making sure that in case such an event happens, the infected people do not travel to a different location, taking the virus with them. 
+However one cannot say for sure, that the church was the main reason for the severe Covid outbreak in South Korea. There are simply too many other variables that could have influenced this.
+For one, there were multiple spreader events, not only the Church one (see the bar chart "Top 10 Infection Reasons"). Additionally, we do not know for sure, that patient number 31 was the only person infected at that church event. While she was the first one to be tested positive we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that simply wasn't tested positive or didn't get tested at all. And while the case datatable states that patient 31 hat a total of 1160 contacts, we are only able to trace back a total of 17 direct connections via the patientinfo datatable.
 
-To sum it up, YES, the Church Event had a serious impact on the Covid spread in South Korea. However we are not able to confirm the claim 100% stating that it was the number one reason the outbreak was so severe.
-
+To sum it up, YES, the Church Event had an impact on the Covid spread in South Korea. We can confirm, that the Shincheonji Church event was one reason that ultimately led to skyrocketing cases in the country. Thus, we are able confirm our claim. 
+However, we would **not** be able to confirm that the superspreader event was the number one reason or one of the main reasons for the outbreak. Thus, the picture that was communicated in the local as well as international media is not quite accurate.
 <p>&nbsp;</p>
 
 
 ## Claim 03
 #### The temperature level correlates with daily number of infection cases.
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
 * Concerning other viruses it is often said that the temperature level has a significant impact on the daily number of infection cases.
 Thus it is reasonable to inspect whether this is also true for COVID-19.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
 * Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we look at the data of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.  
 
-**Our approach:**
+**Our Approach:**
 
 * First, we plot the existing data as scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our hypothesis. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
 Ho : r = 0. We use the commonly used significance level of alpha = 0.05, meaning that we will reject Ho if the p-value is below 0.05.
@@ -801,7 +812,7 @@ The p-value of our performed Spearman correlation test is ~0.257 while our alpha
 As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
 
 
-**Discussion**
+**Discussion:**
 
 * It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases is independent of the temperature level.
 * Other circumstances, like super spreader events, distort the number of infection cases for individual regions and thus may obscure a possible association between temperature level and number of infection cases.
@@ -812,17 +823,17 @@ As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstan
 ## Claim 04
 #### Search data is associated with the development of daily cases
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
 * Previous results showed that identifying covid outbreaks quickly is important to react appropriately, e.g. with social-distancing measures.
 It might thus be interesting to investigate factors which can possibly predict future covid outbreaks.
 
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
 * As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after their onset of symptoms. It should thus be explored whether search data is related to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
 
-**Our approach:**
+**Our Approach:**
 
 * To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus". As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
 As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
@@ -986,7 +997,7 @@ cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 Above results show no significant association of both variables; we cannot reject the null hypothesis of not correlated data.
 
 
-**Discussion**
+**Discussion:**
 
 Overall, the available search data and its correlation to covid cases seems to be a promising factor to be applied for predictions of covid cases.
 However, as South Korea quickly accelerated its testing capacities, our calculated time gap of 6 days might not be valid under those circumstances.
