@@ -325,12 +325,11 @@ ggplot(merge_CasesMeasures, aes(x = date)) +
 
 * The number of active policies increased heavily when the number of daily cases rose to its peak end of February and kept increasing until June
 * However, as the figure shows, some policies were also removed again.  
-* What is striking is that there seems to be a lag between the introduction of new policies and its assumed causing effect in terms of reduced daily cases. 
-* Therefore, we first inspect the Pearson correlation between both variables before having a closer look at the cross-correlation to gain further insights.
+* In the following, we inspect the Pearson correlation between both variables number of active policies and daily infection cases.
 * We use the Pearson correlation throughout both tests as our variables "Daily Cases" and "Number of Policies" are of quantitative nature and we presume a linear relationship between those variables. Furthermore, we see no indication for considerable outliers that could distort the results.
 
 
-**Person Correlation**
+**Pearson Correlation**
 ```{r echo=FALSE, message=FALSE}
 #Test - Statistics
 cor.test(merge_CasesMeasures$cumulativeNumbers, 
@@ -348,31 +347,14 @@ cor.test(merge_CasesMeasures$cumulativeNumbers,
 
 <p>&nbsp;</p>
 
- 
-```{r echo=FALSE, message=FALSE}
-#Calculate statistics
-#Correlation 
-cor_CasesMeasures <- cor(merge_CasesMeasures$cumulativeNumbers, merge_CasesMeasures$daily_cases, method = 'pearson')
-#Cross-correlation
-ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, main = "Cross-Correlation between Daily Cases and Number of Policies")
-```
-
-
-**Interpretation:**
-
-* For the cross-correlation we again test with the Pearson correlation and therefore have the same assumptions as described earlier. 
-* The blue dashed lines show the boundaries of the 95% confidence interval.
-* For a lag of zero we obtain the same results as already shown in our test above.
-* However, as can be seen, the negative correlation increases from ~ -0.2 at lag 0 up to ~ -0.6 at lag -33.
-* This indicates that increased number of policies are likely to lead to decreased number of daily cases about 30 days later.  
 
 **Discussion:**
 
 * By testing the correlation between the variables "Daily Cases" and "Number of Policies" we wanted to show that a significant relationship between those two variables exists.
-* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation for a time lag of ~ 1 month.  
+* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation
 * However, we need to take into account that there are multiple active policies in the same time period and also across different areas. The first two figures presented in this claim show the type of different introduced policies and their start dates while the following figure examplifies the overlap of various polices. Therefore, it is not possible to reduce the effect of declining number of daily cases to one or even a type of policies. 
-* Furthermore, there is need to consider various other possible impacts that could have caused this relationship.
-* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers.
+* Furthermore, there is need to consider various other possible impacts that could have randomly caused this relationship.
+* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers of daily infection cases.
 
 
 <p>&nbsp;</p>
