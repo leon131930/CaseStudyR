@@ -378,7 +378,7 @@ ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, m
 <p>&nbsp;</p>
 
 ## Claim 02
-#### The superspreader event in the Shincheonji Church in Feb. 2020 was the number one reason the Covid cases in South Korea turned out to be so intense in the first place.
+#### The superspreader event in the Shincheonji Church in Feb. 2020 was one reason the Covid cases in South Korea turned out to be so intense in the first place.
 ####[ALTERNATIVE CLAIM]: Superspreader events did spread the virus geographically across many regions of South Korea
 
 **Our initial motivation:**
@@ -425,7 +425,7 @@ case_02_withcoordinates <- case_02[longitude != "-"]
 case_02_withcoordinates[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 
 # Plotting map of South Korea with different sized dots according to number of cases
-ggplot() +
+map_overall_cases <- ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed),
@@ -445,7 +445,7 @@ locations_seoul_church <- data.frame(Location = c("Seoul", "Shincheonji Church")
                                      Longitude = c(127.024612,128.600006),
                                      Latitude = c(37.532600,35.866669))
 
-map_overall_cases <- ggplot() +
+map_overall_cases_final <- ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = case_02_withcoordinates, aes(x=longitude, y=latitude, size = confirmed),
@@ -460,8 +460,9 @@ map_overall_cases <- ggplot() +
 ```
 
 ```{r  echo=FALSE}
-map_overall_cases
+map_overall_cases_final
 ```
+ <p>&nbsp;</p>
 **Short Analysis**
 
 * Seems like there were two hot-spots indeed! On around Seoul and one around the mysterious church event.
@@ -496,6 +497,7 @@ church_cases_overtime <- ggplot() + geom_line(data = patientinfo_02,
 ```{r  echo=FALSE}
 church_cases_overtime
 ```
+<p>&nbsp;</p>
 **Short Analysis**
 
 * Mhm... doesn't look that bad, does it? However, when we think about the fact that this is only one single event, the numbers are not that low at all...maybe the patientinfo table isn't showing the whole picture.
@@ -510,7 +512,6 @@ church_cases_overtime
 
 # aggregate confirmed cases so we can see which infection reason caused the most cases
 overview_infection_cases <- aggregate(x= case_02$confirmed,by= list(case_02$infection_case),FUN= sum)
-overview_infection_cases
 
 # Rename column names to make referencing easier
 overview_infection_cases <- overview_infection_cases %>% rename(infection_reason = Group.1,people_confirmed = x)
@@ -533,10 +534,12 @@ top_10_reasons <- ggplot(data = top_10_cases_without_etc,
 ```{r  echo=FALSE}
 top_10_reasons
 ```
+<p>&nbsp;</p>
 **Short Analysis:**
 
-*Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow" combined.
+* Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow" combined.
 * Let's have a closer look at the beginning of the Shincheonji Church Events. How did it start? Was there a certain "trigger"?
+* XXXX
 
 
 <p>&nbsp;</p>
@@ -588,6 +591,7 @@ church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_0
 ```{r  echo=FALSE}
 church_cases_overtime_inclpatient31
 ```
+
 **Short Analysis:**
 
 * This fits the timeline and development of overall cases pretty well. However, it still doesn't provide a clear picture why the Church was blamed for the virus to go wild.
@@ -644,20 +648,18 @@ church_regions <- region_02%>% filter(province==city)
 # Now loose all the columns that we don't need
 church_regions <- subset(church_regions, select = -c(code, elementary_school_count, kindergarten_count, university_count, academy_ratio, elderly_population_ratio, elderly_alone_ratio, nursing_home_count))
 church_regions_without_city <- subset(church_regions, select = -c(city))
-church_cases_around_SK
 
 # Loose the columns we don't need in the church_cases table to prep for full join
 church_cases_for_join <- subset(church_cases_around_SK, select = -c(city, group, infection_case, longitude, latitude))
 
 # Merging the two tables with Inner join to only get the regions we actually have confirmed cases at
 plotting_table <- merge(church_regions_without_city, church_cases_for_join, by = "province")
-plotting_table
 
 # Change data type to double
 plotting_table[, latitude := as.double(latitude)][, longitude := as.double(longitude)]
 
 # Plotting the graph for the first time
-ggplot() +
+map_plot <- ggplot() +
   geom_polygon(data = south_korea.f, aes(x = long, y = lat, group = group), fill = "lightgrey",
                colour = "grey", size = 0.25) +
   geom_point(data = plotting_table, aes(x=longitude, y=latitude, size = confirmed, color = "Covid Cases related to the Church")) +
