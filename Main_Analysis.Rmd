@@ -713,7 +713,7 @@ To sum it up, YES, the Church Event had a serious impact on the Covid spread in 
 
 
 ## Claim 03
-#### The average temperature level correlates with daily number of infection cases.
+#### The temperature level correlates with daily number of infection cases.
 
 **Our initial motivation:**
 
@@ -722,8 +722,7 @@ So it is reasonable to inspect whether this is also true for COVID-19.
 
 **Claim description in more detail:**
 
-* Therefore, we analyze the relation between the temperature level and daily infection cases within the period from January to June in 2020. Depending on the results, it might be possible to gain insights for further actions to reduce the number of infection cases.
-
+* Therefore, we analyze the relation between the temperature level and the number of daily covid cases within the period from January to June 2020. Within that timeperiod the average temperature of a province ranked between -8℃ and 30℃.  
 **Our approach:**
 
 * First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that average temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
