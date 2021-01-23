@@ -25,17 +25,17 @@ knitr::opts_chunk$set(echo = TRUE)
 # 
 # #required libraries for Claim 2
 # install.packages("maps")
+# install.packages("maptools")
+# install.packages("mapproj")
 # install.packages("ggrepel")
 # install.packages("rgeos")
 # install.packages("sf")
-# install.packages("rnaturalearth")
-# install.packages("rnaturalearthdata")
+# install.packages("sp")
 
 # #required libraries for Claim 4
 # install.packages("patchwork")
 # install.packages("hrbrthemes")
-#install.packages("raster")
-#install.packages("mapproj")
+# install.packages("raster")
 ```
 
 ```{r echo = TRUE, message=FALSE}
@@ -55,8 +55,6 @@ library(maps)
 library(ggrepel)
 library(rgeos)
 library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
 library(maptools)
 library(sp)
 library(raster)
