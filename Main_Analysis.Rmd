@@ -51,13 +51,13 @@ library(ggpubr)
 library(patchwork)
 library(hrbrthemes)
 #required libraries for Claim 2
-library(maps)
 library(ggrepel)
+library(raster)
 library(rgeos)
+library(sp)
 library(sf)
 library(maptools)
-library(sp)
-library(raster)
+library(maps)
 library(mapproj)
 ```
 
