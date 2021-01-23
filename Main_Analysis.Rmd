@@ -3,8 +3,8 @@ title: "COVID-19 Analysis in South Korea"
 author: "Group 86 - Jana Schneider, Jana Jeggle, Felix Heim, Leon Gaertner"
 date: "4 12 2020"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 <p>&nbsp;</p>
@@ -572,7 +572,8 @@ church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_0
              aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020)")) +
   labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Church Outbreak") +
   scale_color_manual(values=c( "black", "purple", "blue","red")) +
-  theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())
+  theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
 ```
 
 ```{r  echo=FALSE}
@@ -812,13 +813,17 @@ It might thus be interesting to investigate factors which can possibly predict f
 
 **Claim Description in More Detail:**
 
-* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after their onset of symptoms. It should thus be explored whether search data is related to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
+* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms.
+* Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after their onset of symptoms.
+* It should thus be explored whether search data is related to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
 
 **Our Approach:**
 
-* To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus". As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
-As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
-After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases. Finally we apply the Pearson correlation test to possibly reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
+* To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus".
+* As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
+* As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
+* After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases.
+* Finally we apply the Pearson correlation test to possibly reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
 
 <p>&nbsp;</p>
 
@@ -849,10 +854,9 @@ ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = searchcolour))
 ```
-Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time.
-To account for the different units of both variables, we use a second y-axis.
-It can be deduced that the course of both variables is quite similar.
-We therefore calculate the Pearson correlation:
+* Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time. To account for the different units of both variables, we use a second y-axis.
+* It can be deduced that the course of both variables is quite similar.
+* We therefore calculate the Pearson correlation:
 
 <p>&nbsp;</p>
 
@@ -863,7 +867,7 @@ corr1 <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
 corr1
 
 ```
-Referring to the time-lag described in our motivation of this claim, we calculate the cross-correlation:
+* Referring to the time-lag described in our motivation of this claim, we calculate the cross-correlation:
 
 <p>&nbsp;</p>
 
@@ -874,10 +878,10 @@ ccfvalues1 <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-co
 ccfvalues1
 ```
 
-The cross-correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
+* The cross-correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
 meaning that an increase of searches best reflects increased number of daily cases six days later, with a strong positive correlation.
 
-Given those indicative results, we apply the Pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
+* Given those indicative results, we apply the Pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
 
 <p>&nbsp;</p>
 
@@ -886,8 +890,8 @@ Given those indicative results, we apply the Pearson correlation test to check w
 cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
 ```
 
-We see that the p-value is very low, allowing us to reject the null hypothesis - which indicates that there is indeed a correlation between search volume and daily cases.
-To further visualize this result, we use permutation testing (1000 times):
+* We see that the p-value is very low, allowing us to reject the null hypothesis - which indicates that there is indeed a correlation between search volume and daily cases.
+* To further visualize this result, we use permutation testing (1000 times):
 
 ```{r echo=FALSE, message=FALSE}
 #***apply permutation testing to test whether this correlation could have arisen by chance***
@@ -915,19 +919,19 @@ ggplot(data.table(T_permuted), aes(x = T_permuted)) +
 
 ```
 
-As the permutation plot shows, it is very unlikely that our observed correlation has arisen by chance.
+* As the permutation plot shows, it is very unlikely that our observed correlation has arisen by chance.
 
 **Short Discussion:**
-Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
+* Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
 
 
 **Investigating Confounding Variables:**
-But could there be an additional confounding variable distorting above result?
-Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
+* But could there be an additional confounding variable distorting above result?
+* Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
 if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
 
-We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
-Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total cases per day) and calculate the Pearson correlation.
+* We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
+* Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total cases per day) and calculate the Pearson correlation.
 Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test.
 As the covid outbreak in Shincheonji church was a one-time event, we only take confirmed cases until ten days after the event (18.02-28.02.) into our calculation:
 
@@ -975,18 +979,17 @@ corr2
 cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 ```
 
-Above results show no significant association of both variables; we cannot reject the null hypothesis of not correlated data.
+* Above results show no significant association of both variables; we cannot reject the null hypothesis of not correlated data.
 
 
 **Discussion:**
 
-Overall, the available search data and its correlation to covid cases seems to be a promising factor to be applied for predictions of covid cases.
-However, as South Korea quickly accelerated its testing capacities, our calculated time gap of 6 days might not be valid under those circumstances.
+* Overall, the available search data and its correlation to covid cases seems to be a promising factor to be applied for predictions of covid cases.
+* However, as South Korea quickly accelerated its testing capacities, our calculated time gap of 6 days might not be valid under those circumstances.
 
-Also, it is worth mentioning that Google previously tried simulating infectious diseases like the flu based on Google Search data, which turned out to be unsuccessful.
-Therefore one should be very careful in generalizing our findings.
-
-Further research on this should be done for countries with a second wave of covid cases in a setup of well-developed testing capacities.
+* Also, it is worth mentioning that Google previously tried simulating infectious diseases like the flu based on Google Search data, which turned out to be unsuccessful.
+* Therefore one should be very careful in generalizing our findings.
+* Further research on this should be done for countries with a second wave of covid cases in a setup of well-developed testing capacities.
 
 
 
