@@ -692,9 +692,16 @@ south_korea &lt;- raster::getData(&quot;GADM&quot;, country = &quot;South Korea&
 </ul>
 <p><strong>Claim description in more detail:</strong></p>
 <ul>
-<li><p>Therefore, we analyze the relation between the temperature level and the number of daily covid cases within the period from January to June 2020. Within that timeperiod the average temperature of a province ranked between -8℃ and 30℃.<br />
-<strong>Our approach:</strong></p></li>
-<li><p>First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that average temperature level associates with daily number of infection cases our null hypothesis formulates as follows: Ho : r = 0. Furthermore, we use the commonly used significance level of alpha = 0.05. Therefore, we will reject Ho if the p-value is below 0.05.</p></li>
+<li>Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we consider the daily cases and average temperature of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.</li>
+</ul>
+<p><strong>Our approach:</strong></p>
+<ul>
+<li>First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: Ho : r = 0. Furthermore, we use the commonly used significance level of alpha = 0.05. Therefore, we will reject Ho if the p-value is below 0.05.</li>
+</ul>
+<p><strong>Discussion</strong></p>
+<ul>
+<li>It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases are independent of the temperatur level.</li>
+<li>Other circumstances, like super spreader events, distort the number of infection cases and thus may obscure a possible association between temperature level and number of infection cases.</li>
 </ul>
 <p>
  
@@ -703,7 +710,7 @@ south_korea &lt;- raster::getData(&quot;GADM&quot;, country = &quot;South Korea&
 <p>
  
 </p>
-<p>As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot whicht is a typical characteristic for an outlier. Therefore, it is seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer the Spearman correlation test.</p>
+<p>As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for an outlier. Therefore, it is seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer the Spearman correlation test.</p>
 <p>
  
 </p>
@@ -711,7 +718,7 @@ south_korea &lt;- raster::getData(&quot;GADM&quot;, country = &quot;South Korea&
 <p>
  
 </p>
-<p>Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the to variables can be seen.</p>
+<p>Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the two variables can be seen.</p>
 <p>
  
 </p>
