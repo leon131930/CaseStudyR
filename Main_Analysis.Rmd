@@ -25,17 +25,17 @@ knitr::opts_chunk$set(echo = TRUE)
 # 
 # #required libraries for Claim 2
 # install.packages("maps")
+# install.packages("maptools")
+# install.packages("mapproj")
 # install.packages("ggrepel")
 # install.packages("rgeos")
 # install.packages("sf")
-# install.packages("rnaturalearth")
-# install.packages("rnaturalearthdata")
+# install.packages("sp")
 
 # #required libraries for Claim 4
 # install.packages("patchwork")
 # install.packages("hrbrthemes")
-#install.packages("raster")
-#install.packages("mapproj")
+# install.packages("raster")
 ```
 
 ```{r echo = TRUE, message=FALSE}
@@ -51,15 +51,13 @@ library(ggpubr)
 library(patchwork)
 library(hrbrthemes)
 #required libraries for Claim 2
-library(maps)
 library(ggrepel)
-library(rgeos)
-library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(maptools)
-library(sp)
 library(raster)
+library(rgeos)
+library(sp)
+library(sf)
+library(maptools)
+library(maps)
 library(mapproj)
 ```
 
@@ -136,15 +134,15 @@ plot(plot_germany)
 ## Claim 01 
 #### By imposing a multitude of different types of policies, the government of South Korea managed to reduce the number of daily infection cases.
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
 * South Korea generally showed  covid cases of much lower level (compared to Germany). In addition, South Korea was able to drastically reduce its number of daily covid cases from its peak end of February. As social-distancing policies are known to be a global measure to contain the spread of the virus, we investigate their influence of policies on the course of the pandemic in South Korea.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
 * As the number of infection cases in South Korea increased heavily, the government became more active in terms of introducing new restricting policies across all areas of life with the aim to decrease the number of daily infection cases.
 
-**Our approach:**
+**Our Approach:**
 
 * First, we inspect the different types of policies and when they were imposed by the government during the period from January to July 2020. 
 * Then, we show an example of imposed policies in the areas of administration, education and society to outline the overlap of different policies within the same time period. 
@@ -325,12 +323,11 @@ ggplot(merge_CasesMeasures, aes(x = date)) +
 
 * The number of active policies increased heavily when the number of daily cases rose to its peak end of February and kept increasing until June
 * However, as the figure shows, some policies were also removed again.  
-* What is striking is that there seems to be a lag between the introduction of new policies and its assumed causing effect in terms of reduced daily cases. 
-* Therefore, we first inspect the Pearson correlation between both variables before having a closer look at the cross-correlation to gain further insights.
+* In the following, we inspect the Pearson correlation between both variables number of active policies and daily infection cases.
 * We use the Pearson correlation throughout both tests as our variables "Daily Cases" and "Number of Policies" are of quantitative nature and we presume a linear relationship between those variables. Furthermore, we see no indication for considerable outliers that could distort the results.
 
 
-**Person Correlation**
+**Pearson Correlation**
 ```{r echo=FALSE, message=FALSE}
 #Test - Statistics
 cor.test(merge_CasesMeasures$cumulativeNumbers, 
@@ -348,53 +345,38 @@ cor.test(merge_CasesMeasures$cumulativeNumbers,
 
 <p>&nbsp;</p>
 
- 
-```{r echo=FALSE, message=FALSE}
-#Calculate statistics
-#Correlation 
-cor_CasesMeasures <- cor(merge_CasesMeasures$cumulativeNumbers, merge_CasesMeasures$daily_cases, method = 'pearson')
-#Cross-correlation
-ccf(merge_CasesMeasures$cumulativeNumbers,merge_CasesMeasures$daily_cases, 50, main = "Cross-Correlation between Daily Cases and Number of Policies")
-```
-
-
-**Interpretation:**
-
-* For the cross-correlation we again test with the Pearson correlation and therefore have the same assumptions as described earlier. 
-* The blue dashed lines show the boundaries of the 95% confidence interval.
-* For a lag of zero we obtain the same results as already shown in our test above.
-* However, as can be seen, the negative correlation increases from ~ -0.2 at lag 0 up to ~ -0.6 at lag -33.
-* This indicates that increased number of policies are likely to lead to decreased number of daily cases about 30 days later.  
 
 **Discussion:**
 
 * By testing the correlation between the variables "Daily Cases" and "Number of Policies" we wanted to show that a significant relationship between those two variables exists.
-* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation for a time lag of ~ 1 month.  
+* Our results clearly show, by only considering these two variables, that one can assume a moderate negative correlation
 * However, we need to take into account that there are multiple active policies in the same time period and also across different areas. The first two figures presented in this claim show the type of different introduced policies and their start dates while the following figure examplifies the overlap of various polices. Therefore, it is not possible to reduce the effect of declining number of daily cases to one or even a type of policies. 
-* Furthermore, there is need to consider various other possible impacts that could have caused this relationship.
-* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers.
+* Furthermore, there is need to consider various other possible impacts that could have randomly caused this relationship.
+* Nevertheless, it can be said that it is very likely that the different polices from the government had an influence on the decrease in numbers of daily infection cases.
 
 
 <p>&nbsp;</p>
 
 ## Claim 02
 #### The superspreader event in the Shincheonji Church in Feb. 2020 was one reason the Covid cases in South Korea turned out to be so intense in the first place.
-####[ALTERNATIVE CLAIM]: Superspreader events did spread the virus geographically across many regions of South Korea
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
-* When Covid first reach South Korea the number of cases was relatively low. However, with the "mysterious" patient Number 31, the serious increase in daily cases in South Korea began. A lot of people worldwide including the local government blamed a Christian 'Cult' for this, since one member seemed to have spread the virus.
+* When plotting overall daily cases in South Korea over time one clearly sees that during the first couple of weeks the number of confirmed Covid cases remained relatively low. However, at some point in late February they skyrocketed.
+* We wanted to dive deeper into this "turning point". Since we have heard on the news multiple times that a lot of people worldwide including the local government blamed a Christian "cult" for the explosion of cases, we decided to take a closer look at this event in particular.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
-* Without this particular spreader event in the Shincheonji Church in February in Daegu the Covid-spread would have been seriously lower.
+* We are claiming, that without this particular spreader event in the Shincheonji Church in Daegu the Covid-spread would have been seriously lower.
 * In fact, one could argue that without this spreader event and - to be specific - without the attendance of the church event by patient number "1200000031" (following called Patient 31) the Covid-spread in South Korea wouldn't have been "serious" at all.
 
-**Our approach:**
+**Our Approach:**
 
-* In order to see, whether the public media was right, and the Church did indeed cause the first "serious" spread of the virus we first had a look at the Covid infections throughout South Korea that clearly indicated two main infection cluster.
-* We then had a closer look at the Church cases compared to the overall daily cases and dived a bit deeper into the starting point of the church cluster
-* Finally, we tried to understand how one local event can effect the whole country and created a map showing positively tested people related to the church traveling all over the country.
+* In order to see, whether the public media was right, and the church did indeed cause the first "serious" spread of the virus we first had a look at the Covid infections throughout South Korea.
+* Following we had a closer look at the church cases compared to the overall daily cases and dived a bit deeper into the starting point of the church cluster.
+* Finally, we analyzed if this local event actually effected the whole country. Therefore we plotted a map showing all the people that according to our data were related to the church but were tested positive for Covid in a different region than Daegu. 
+
+We start our analysis by first looking at the spread of Covid cases throughout the country. Where there some areas the cases were really high or was it a more "even" spread?
 
 <p>&nbsp;</p>
 
@@ -410,7 +392,6 @@ region_02 <- copy(region)
 ```{r echo = FALSE, message=FALSE}
 #Let's first have a look at all the Covid Cases spread throughout the country. Where there some
 #areas the cases were really high or was it a more "even" spread throughout the whole country?
-
 # Loading South Korea Data - not necessary here, bc we already do it at the beginning
 # south_korea <- getData("GADM", country = "South Korea", level = 1)
 
@@ -433,7 +414,7 @@ map_overall_cases <- ggplot() +
              alpha = 0.7) +
   scale_size_continuous(range = c(2, 5)) +
   coord_map() +
-  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
+  labs(title = "Confirmed Covid-Cases in South Korea", x="Longitude", y="Latitude")
 
 # Seems like there were two hot-spots indeed! Probably some major cities? Seoul? Also we heard, that
 # there was quite some rumor about a church-event causing the spread in South Korea. Could that
@@ -456,17 +437,17 @@ map_overall_cases_final <- ggplot() +
                   fontface = "bold", nudge_x = c(1, -2),
                   nudge_y = c(0.5, -0.5)) +
   coord_map() +
-  labs(title = "Confirmed Covid-Cases spread over South Korea", x="Longitude", y="Latitude")
+  labs(title = "Confirmed Covid-Cases in South Korea", x="Longitude", y="Latitude")
 ```
 
 ```{r  echo=FALSE}
 map_overall_cases_final
 ```
  <p>&nbsp;</p>
-**Short Analysis**
+**Short Analysis:**
 
-* Seems like there were two hot-spots indeed! On around Seoul and one around the mysterious church event.
-* Let's have a closer look on this. How did the church related cases develop over time and did it have a significant impact on the overall daily cases?
+* Seems like there were two hotspots indeed! One around Seoul and one around the mysterious church event.
+* Let's have a closer look at this. How did the church related cases develop over time and did they have a significant impact on the overall daily cases?
 
 <p>&nbsp;</p>
 ```{r echo = FALSE, message=FALSE}
@@ -485,23 +466,25 @@ patientinfo_02_church <- patientinfo_02_church[, dailychurchcases := .N, by = co
 
 # Plotting both over time
 church_cases_overtime <- ggplot() + geom_line(data = patientinfo_02,
-                     aes(x=confirmed_date, y=daily_cases, colour="black")) +
+                     aes(x=confirmed_date, y=daily_cases, colour="Overall Daily Cases")) +
   geom_line(data = patientinfo_02_church,
-            aes(x=confirmed_date, y= dailychurchcases, colour = "red")) +
+            aes(x=confirmed_date, y= dailychurchcases, colour = "Shincheonji Church related Cases")) +
   labs(x="Time", y="Cases per Day", title = "Shincheonji vs. Overall Daily Cases over Time") +
-  scale_color_discrete(name = "Legend", labels = c("Overall Daily Cases", "Shincheonji Church related Cases")) +
-  theme(legend.position="bottom", legend.title = element_blank())+
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
+  scale_color_manual(values=c( "black", "red")) +
+  theme(legend.position="bottom", legend.title = element_blank())
 ```
+
 
 ```{r  echo=FALSE}
 church_cases_overtime
 ```
 <p>&nbsp;</p>
-**Short Analysis**
+**Short Analysis:**
 
-* Mhm... doesn't look that bad, does it? However, when we think about the fact that this is only one single event, the numbers are not that low at all...maybe the patientinfo table isn't showing the whole picture.
-* Also, in terms of time it still fits pretty well to the beginning of the first larger outbreak. Let's dive a bit deeper. There has to be a reason why everyone was going nuts about this one! Can we find the top 10 infection reasons?
+* At first it doesn't seem like the Shincheonji cases were such a big deal. Since compared to the overall daily cases the number of church related cases was relatively low.
+* But when we think about the fact that this is only one single event, the numbers don't seem to be that low at all.
+* Still, this cannot be the reason everyone was so convinced the Shincheonji church was the bad guy. Maybe the dataset (= the patientinfo datatable) we used isn't showing the whole picture?
+* Let's dive a bit deeper. There has to be a reason why everyone was going nuts about this one! Are we able find the top 10 infection reasons? Let's have a look at the case datatable, since it provides approximately two times as many datapoints, as the patientinfo datatable does. 
 
 <p>&nbsp;</p>
 
@@ -527,6 +510,7 @@ top_10_reasons <- ggplot(data = top_10_cases_without_etc,
            y=reorder(infection_reason,people_confirmed))) +
   geom_bar(stat="identity", width = 0.7, fill = "lightblue") +
   geom_text(aes(label=people_confirmed), hjust=-.1, color="black", size=3) +
+  xlim(0,5500) +
   labs(x="Number of Cases", y="Infection Reason",
        title = "Top 10 Infection Reasons")
 ```
@@ -538,8 +522,8 @@ top_10_reasons
 **Short Analysis:**
 
 * Alright, seems like we actually found a bad guy here. Infection cases related to the Shincheonji Church are in fact pretty high. Even higher as "Contact with patient" and "Oversees inflow" combined.
-* Let's have a closer look at the beginning of the Shincheonji Church Events. How did it start? Was there a certain "trigger"?
-* XXXX
+* Let's have a closer look at the beginning of the Shincheonji Church case-outbreak. How did it start? Was there a certain "trigger"?
+* Let's look for the very first patient that was confirmed positive for Covid **and** was related to the Shincheonji Church. In the news they were talking about an elderly women... Can this be confirmed with the help of our dataset?
 
 
 <p>&nbsp;</p>
@@ -557,9 +541,12 @@ patient_31 <- earliest_dates %>% filter(infection_case == "Shincheonji Church")
 
 ```{r  echo=FALSE}
 patient_31
-
 ```
-Turns out in fact Patient Number 31, in her 60s, was diagnosed with Covid on Tuesday, 18th Feb 2020 as the first person related to the Shincheonji Church and she has an insane amount of contact numbers. No wonder Shincheonji Church cases were so high... imagine those 1160 contacts infecting even more people!
+<p>&nbsp;</p>
+* Turns out in fact patient number 31, in her 60s, was diagnosed with Covid on Tuesday, 18th Feb 2020, as the first person related to the Shincheonji Church and she has an **insane** amount of contact numbers.
+* No wonder Shincheonji Church cases were so high... Imagine those 1160 contacts infecting even more people!
+* Let's quickly plot this over time to get the whole picture and see on what day patient 31 was going to the church and at what point in time she was actually diagnosed. 
+<p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
 # Let's quickly plot this over time to get the whole picture and see when patient 31 was going to the
@@ -576,14 +563,15 @@ super_spreader_church[, Date:=as.Date(Date)]
 
 # Plot everything over time
 church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_02,
-                     aes(x=confirmed_date, y=daily_cases), colour="black") +
+                     aes(x=confirmed_date, y=daily_cases, colour="Overall Daily Cases")) +
   geom_line(data = patientinfo_02_church,
-            aes(x=confirmed_date, y= dailychurchcases), colour = "red") +
+            aes(x=confirmed_date, y= dailychurchcases, colour = "Shincheonji Church related Cases")) +
   geom_vline(data = super_spreader_church,
              aes(xintercept = Date, colour = "Patient 31 visiting Shincheonji Church (Sunday,16th Feb 2020) - acc. to NY Times")) +
   geom_vline(data = subset(earliest_dates, infection_case == "Shincheonji Church"),
              aes(xintercept = confirmed_date, colour = "Patient 31 confirmed as Covid-19 positive (Tuesday, 18th Feb 2020)")) +
   labs(x="Time", y="Cases per Day", title = "Patient 31 and the Shincheonji Church Outbreak") +
+  scale_color_manual(values=c( "black", "purple", "blue","red")) +
   theme(legend.position="bottom", legend.direction="vertical", legend.title = element_blank())+
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")
 ```
@@ -591,12 +579,13 @@ church_cases_overtime_inclpatient31 <- ggplot() + geom_line(data = patientinfo_0
 ```{r  echo=FALSE}
 church_cases_overtime_inclpatient31
 ```
-
+<p>&nbsp;</p>
 **Short Analysis:**
 
-* This fits the timeline and development of overall cases pretty well. However, it still doesn't provide a clear picture why the Church was blamed for the virus to go wild.
+* This fits the timeline and development of overall cases pretty well. 
+* However, it still doesn't provide a clear picture why the church was blamed for the virus to go wild, does it?
 * Just because one event in Daegu results in an enormous amount of cases doesn't necessarily mean, that the whole country will be affected by this.
-* Did people travel outside of Daegu but where infected at the church by any chance?
+* Is there a way to determine, whether people that were infected with Covid at this particular church event did travel to a different city or region, basically "taking the virus with them"?
 
 <p>&nbsp;</p>
 
@@ -636,8 +625,9 @@ regions_outside_daegu_plot
 
 **Short Analysis:**
 
-* Alright, indeed a couple of people. Gyeongsangbuk-do is probably close to Daegu, causing the high amount of cases?
-* Are we able to plot this on a map showing where exactly this occurred?
+* Alright, indeed a couple of people were tested positive in different regions than Daegu but were still identified as "Shincheonji Church related". Thus indicating, that they travelled while being infected with the virus. 
+* Gyeongsangbuk-do has quite a large number of positive tested people that are related to the church.
+* Are we able to plot this on a map showing in what region exactly the church related people were tested positive for Covid-19?
 
 <p>&nbsp;</p>
 
@@ -695,46 +685,41 @@ final_map_plot <- ggplot() +
 final_map_plot
 ```
 
-**Short Analysis**
+**Short Analysis:**
 
-* While obviously the most cases related to the church occurred in Daegu or close to Daegu, this map shows pretty well that people infected with covid that were somehow related to that church event, appeared all over the country.
-* Thus, people traveling from Daegu to e.g. Seoul while being infected, might have cause the virus to spread even further. From that one outbreak in Daegu into the whole country - and maybe even further.
+* While obviously the most cases related to the church occurred in Daegu or close to Daegu, this map shows pretty well that positive tested people that were somehow related to that church event, appeared **all over the country**. Important to mention here is, that this weren't just a few but numerous incidents sometimes amounting to hundreds of infected people. 
+* Thus, people traveling from Daegu to other regions within South Korea while being infected, might have caused the virus to spread: from that one outbreak in Daegu into the whole country - and maybe even further.
 
 <p>&nbsp;</p>
 
-**Discussion**
+**Discussion:**
 
-It seems like the event in the church indeed had significant effects on the Covid spread throughout South Korea and it highlights the importance of policies such as travel restrictions making sure that in case such an event happens, the infected people do not travel to a different location, taking the virus with them. However in terms of the claim one cannot say for sure, that the Church was the main reason for the severe Covid outbreak in South Korea. There are simply too many other variables that could have influenced this.
-For one, there were multiple spreader events, not only the Church one (see the Bar Chart "Top 10 Infection Reasons"). Additionally, we do not know for sure, that Patient Number 31 was the only person infected at that Church event. While she was the first one to be tested positive only person infected at that Church event. While she was the first one to be tested positive we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that simply wasn't tested positive or didn't get tested at all. And while the case datatable states that Patient 31 hat a total of 1160 contacts, we are only able to trace back a total of 17 direct connections via the patientinfo datatable.
+* It seems like the event at the church indeed had significant effects on the Covid spread throughout South Korea.
+* This highlights the importance of policies such as travel restrictions, that are making sure that in case such an event happens, the infected people do not travel to a different location, taking the virus with them. 
+* However, one cannot say for sure, that the church was the main reason for the severe Covid outbreak in South Korea. There are simply too many other variables that could have influenced this. For one, there were multiple spreader events, not only the church one (see the bar chart "Top 10 Infection Reasons").
+* Additionally, we do not know for sure, that patient number 31 was the only person infected at that church event. While she was the first one to be tested positive we do not know whether there was a 2nd, 3rd or 4th person infected at that church event that simply wasn't tested positive or didn't get tested at all.
 
-To sum it up, YES, the Church Event had a serious impact on the Covid spread in South Korea. However we are not able to confirm the claim 100% stating that it was the number one reason the outbreak was so severe.
-
+* To sum it up, YES, the church event had an impact on the Covid spread in South Korea. We can confirm, that the Shincheonji Church event was one reason that ultimately led to skyrocketing cases in the country. Especially the fact that people that got infected at the church event traveled to different regions caused the Shincheonji Church to not only have a local but a nation-wide impact. And thus, we are able confirm our claim. 
+* However, we would **not** be able to confirm that the superspreader event was one of the main reasons for the outbreak. So the picture that was communicated in the local as well as international media may not be accurate.
 <p>&nbsp;</p>
 
 
 ## Claim 03
 #### The temperature level correlates with daily number of infection cases.
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
-* Concerning other viruses it is often said that the temperature level has an significant impact on the daily number of infection cases.
-So it is reasonable to inspect whether this is also true for COVID-19.
+* Concerning other viruses it is often said that the temperature level has a significant impact on the daily number of infection cases.
+Thus it is reasonable to inspect whether this is also true for COVID-19.
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
-* Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we consider the daily cases and average temperature of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.  
+* Therefore, we analyse the association between the average temperature level and the number of covid cases per day within the period from January to June 2020. Thereby, we look at the data of the different provinces of South Korea. Within the time period from January to June 2020 the average temperature ranked between -8℃ and 30℃.  
 
-**Our approach:**
+**Our Approach:**
 
-* First, we plot the existing data into a scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our claim. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
-Ho : r = 0. Furthermore, we use the commonly used significance level of alpha = 0.05. Therefore, we will reject Ho if the p-value is below 0.05.
-
-**Discussion**
-
-* It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases are independent of the temperatur level.
-* Other circumstances, like super spreader events, distort the number of infection cases and thus may obscure a possible association between temperature level and number of infection cases.
-
-
+* First, we plot the existing data as scatter plot in order to see the kind of underlying distribution. For this, we plot the average temperature on the x-axis and the number of daily infection cases on the y-axis. By inspecting the plot we then can decide whether to use a Pearson or Spearman test. Depending on the results of the test, we are able to reject or fail to reject our hypothesis. As we want to show that temperature level associates with daily number of infection cases our null hypothesis formulates as follows: 
+Ho : r = 0. We use the commonly used significance level of alpha = 0.05, meaning that we will reject Ho if the p-value is below 0.05.
 
 <p>&nbsp;</p>
 
@@ -754,16 +739,17 @@ timeProvince[, date:= as.IDate(date)]
 melted_dt <- merge(weather,timeProvince,by=c('province','date'))
 
 # Plot data: avg weather
-ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "remaining provinces")))+geom_point() +
-  labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation: Avg. Temperature vs. Daily Cases (all provinces)") +
+ggplot(melted_dt,aes(avg_temp,daily_cases,color=ifelse(province=='Daegu', "Daegu", "Remaining Provinces")))+geom_point() +
+  labs(x = "Average Temperature in °C", y = "Cases per Day", 
+       title = "Relation: Avg. Temperature vs. Daily Cases (all Provinces)") +
   theme(legend.title=element_blank()) 
 
 ```
 
 <p>&nbsp;</p>
 
-As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for an outlier. Therefore, it is seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer the Spearman correlation test.
+* As can be seen above, the province Daegu has way higher numbers of daily infection cases and thus distorts the entire plot which is a typical characteristic for outlier. Therefore, it seems to be reasonable to plot the data without this province in order to get a better understanding on the relationship between temperature and number of daily infection cases in the remaining provinces. 
+* Nevertheless, we already can conclude that the data is not normally distributed. Also, the Spearman correlation test is more robust to outliers than the Pearson correlation test. Thus, we prefer to apply the Spearman correlation test.
 
 
 <p>&nbsp;</p>
@@ -777,8 +763,8 @@ melted_dt_without_Daegu = melted_dt[province!='Daegu']
 # Plot data: avg weather
 ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
   geom_smooth(method = "loess") +
-  labs(x = "Average Temperature", y = "Cases per Day", 
-       title = "Relation: Avg. Temperature vs. Daily Cases (without Daegu)") +
+  labs(x = "Average Temperature in °C", y = "Cases per Day", 
+       title = "Relation: Avg. Temperature vs. Daily Cases (without Daegu Province)") +
   theme(legend.title=element_blank()) 
 
 
@@ -786,7 +772,7 @@ ggplot(melted_dt_without_Daegu,aes(avg_temp,daily_cases))+geom_point() +
 
 <p>&nbsp;</p>
 
-Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the two variables can be seen.
+* Without the data from the province Daegu it is possible to rectify the data points. However, no considerable correlation between the two variables can be seen.
 
 <p>&nbsp;</p>
 
@@ -804,29 +790,40 @@ p_value
 
 **Interpretation:**
 
-The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
-As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
+* The p-value of our performed Spearman correlation test is ~0.257 while our alpha-value is 0.05. 
+* As ~0.257 > 0.05 we fail to reject our Ho. Therefore, under the given circumstances, we have no evidence to suggest that there might be a significant correlation between the average temperature and the number of daily infection cases. 
+
+
+**Discussion:**
+
+* It is important to note that we only fail to reject the null hypothesis. We cannot say that the number of infection cases is independent of the temperature level.
+* Other circumstances, like super spreader events, distort the number of infection cases for individual regions and thus may obscure a possible association between temperature level and number of infection cases.
+
 
 <p>&nbsp;</p>
 
 ## Claim 04
-#### Search data is related to the development of daily cases, thus could function as predictor for future outbreaks
+#### Search data is associated with the development of daily cases
 
-**Our initial motivation:**
+**Our Initial Motivation:**
 
 * Previous results showed that identifying covid outbreaks quickly is important to react appropriately, e.g. with social-distancing measures.
 It might thus be interesting to investigate factors which can possibly predict future covid outbreaks.
 
 
-**Claim description in more detail:**
+**Claim Description in More Detail:**
 
-* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms. Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after the onset of symptoms. It should thus be explored whether search data is linked to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
+* As large-scale covid testing was not yet implemented in the beginning of the pandemic, infected individuals may not have been tested immediately after the onset of covid symptoms.
+* Considering South Koreas advanced level of digitization, it is probable that infected individuals searched for covid-related symptoms online after their onset of symptoms.
+* It should thus be explored whether search data is related to covid-cases, with a respective time gap between individuals searching online for symptoms and eventually being tested.
 
-**Our approach:**
+**Our Approach:**
 
-* To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus". As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
-As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
-After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases. Finally we apply the pearson tests for correlation to reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
+* To explore this possible relation, we first select available search data - as the search volume for different keywords is in relative units (preventing volume comparisons), we choose the keyword "coronavirus".
+* As time period for investigating the relation between searches for "coronavirus" and daily cases we select with Mid-February to end of June.
+* As data foundation for daily cases we use the "Time"-table which contains more data than the table "Patientinfo".
+* After joining both tables, we plot the data and calculate the correlation between both variables. We also look into cross-correlation to account for a possible time gap between search volume and daily cases.
+* Finally we apply the Pearson correlation test to possibly reject the null-hypothesis of not correlated variables upon the commonly used significance level of alpha = 0.05.
 
 <p>&nbsp;</p>
 
@@ -846,21 +843,20 @@ churchcolour <- "#9400D3"
 #plot search volume and daily cases, using two y-axis because of relative values of searchtrend table
 ggplot(merged_dt1[date %between% c("2020-02-15", "2020-06-29")],aes(x=date)) +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %y")+
-  geom_line(aes(y=(coronavirus), col = "Relative search volume")) +
-  geom_line(aes(y=daily_cases/8, col = "Daily confirmed cases")) +
+  geom_line(aes(y=(coronavirus), col = "Relative Search Volume")) +
+  geom_line(aes(y=daily_cases/8, col = "Cases per Day")) +
   scale_color_manual(values=c(dailycasecolour,searchcolour))+
-  labs(x="Time", title="Daily covid cases & relative search volume for 'coronavirus'")+
+  labs(x="Time", title="Cases per Day & relative Search Volume for 'coronavirus'")+
   scale_y_continuous(
-    name = "relative search volume",
-    sec.axis = sec_axis(trans=~.*8, name="daily confirmed cases",labels = scales::comma))+
+    name = "Relative Search Volume",
+    sec.axis = sec_axis(trans=~.*8, name="Cases per Day",labels = scales::comma))+
   theme(legend.position="bottom", legend.title = element_blank(), 
         axis.title.y.right = element_text(angle=90, color = dailycasecolour),
         axis.title.y.left = element_text(color = searchcolour))
 ```
-Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time.
-To account for the different units of both variables, use a second y-axis.
-It can be deduced that the course of both variables is quite similar.
-We therefore calculate the pearson correlation:
+* Above plot shows the relative search volume of the term "coronavirus" and the daily cases by time. To account for the different units of both variables, we use a second y-axis.
+* It can be deduced that the course of both variables is quite similar.
+* We therefore calculate the Pearson correlation:
 
 <p>&nbsp;</p>
 
@@ -871,21 +867,21 @@ corr1 <- cor(merged_dt1$daily_cases, merged_dt1$coronavirus, method = 'pearson')
 corr1
 
 ```
-To account for the time lag we see in above plot, we calculate the cross correlation:
+* Referring to the time-lag described in our motivation of this claim, we calculate the cross-correlation:
 
 <p>&nbsp;</p>
 
 ```{r echo=FALSE, message=FALSE}
-#Using Cross correlation to show that search cases can indicate covid cases
+#Using Cross-correlation to show that search cases can indicate covid cases
 # -> Shows high correlation (0.92) for a time lag of 6 days
 ccfvalues1 <- ccf(merged_dt1$coronavirus,merged_dt1$daily_cases, main ="Cross-correlation between search volume and daily cases", plot = TRUE)
 ccfvalues1
 ```
 
-The cross correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
+* The cross-correlation result suggests that the search volume correlates most (0.92) with daily cases at a time gap of 6 days,
 meaning that an increase of searches best reflects increased number of daily cases six days later, with a strong positive correlation.
 
-Given those indicative results, we apply the pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
+* Given those indicative results, we apply the Pearson correlation test to check whether we are able to reject our null hypothesis of not correlated variables:
 
 <p>&nbsp;</p>
 
@@ -894,8 +890,8 @@ Given those indicative results, we apply the pearson correlation test to check w
 cor.test(merged_dt1$daily_cases, merged_dt1$coronavirus, method="pearson")
 ```
 
-We see that the p-value is very low, allowing us to reject the null hypothesis - which indicates that there is indeed a correlation between search volume and daily cases.
-To further visualize this result, we use permutation testing (1000 times):
+* We see that the p-value is very low, allowing us to reject the null hypothesis - which indicates that there is indeed a correlation between search volume and daily cases.
+* To further visualize this result, we use permutation testing (1000 times):
 
 ```{r echo=FALSE, message=FALSE}
 #***apply permutation testing to test whether this correlation could have arisen by chance***
@@ -923,20 +919,21 @@ ggplot(data.table(T_permuted), aes(x = T_permuted)) +
 
 ```
 
-As the permutation plot shows, it is very unlikely that our observed correlation has arisen by chance.
+* As the permutation plot shows, it is very unlikely that our observed correlation has arisen by chance.
 
 **Short Discussion:**
-Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
+* Above results suggest that internet searches for "coronavirus" indicate future covid cases with a time gap of 6 days.
 
 
-**Investigating confounding variables:**
-But could there by an additional confounding variable distorting above result?
-Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
+**Investigating Confounding Variables:**
+* But could there be an additional confounding variable distorting above result?
+* Considering there have been superspreader events in the beginning of the pandemic (e.g. church gatherings), we further investigate
 if such superspreader events accelerated the dynamic of the pandemic, which would weaken our claim of using search data as possible prediction of outbreaks.
 
-We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
-Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total daily cases) and calculate the Pearson correlation.
-Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test:
+* We first select the biggest superspreader event in the beginning of the pandemic: the "Shincheonji Church"
+* Our approach is similar as before: We plot both variables (now cases of Shincheonji church and total cases per day) and calculate the Pearson correlation.
+Finally we test whether a possible association is significant (if null-hypothesis can be rejected) by applying the Pearson correlation test.
+As the covid outbreak in Shincheonji church was a one-time event, we only take confirmed cases until ten days after the event (18.02-28.02.) into our calculation:
 
 <p>&nbsp;</p>
 
@@ -982,9 +979,21 @@ corr2
 cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 ```
 
-Above results show no significant association of both variables; we can not reject the null hypothesis of not correlated data.
+* Above results show no significant association of both variables; we cannot reject the null hypothesis of not correlated data.
 
-**Interpretation**
+
+**Discussion:**
+
+* Overall, the available search data and its correlation to covid cases seems to be a promising factor to be applied for predictions of covid cases.
+* However, as South Korea quickly accelerated its testing capacities, our calculated time gap of 6 days might not be valid under those circumstances.
+
+* Also, it is worth mentioning that Google previously tried simulating infectious diseases like the flu based on Google Search data, which turned out to be unsuccessful.
+* Therefore one should be very careful in generalizing our findings.
+* Further research on this should be done for countries with a second wave of covid cases in a setup of well-developed testing capacities.
+
+
+
+
 
 
 
