@@ -992,10 +992,25 @@ cor.test(merged_dt2$daily_cases, merged_dt2$dailychurchcases, method="pearson")
 * Further research on this should be done for countries with a second wave of covid cases in a setup of well-developed testing capacities.
 
 
+<p>&nbsp;</p>
 
 
+### Overall Conclusion
+
+* Policy measures imposed to contain the virus were most likely successful
+    * Due to a variety of different policies, the effect of individuals policies on daily           cases could not be shown
+
+* Superspreader events are indicative of accelerating the course of the covid pandemic
+    * The effect of the church-event on overall cases could not be robustly proven due to a         lack of data
+    * Additional data on superspreader events to be analyzed
+
+* Average temperature does not significantly correlate with daily cases
+    * Specific in-door temperature data for large gatherings could be subject of further            research 
 
 
+* Search data can possibly predict future covid-outbreaks, considering the time lag & strong positive cross-correlation
+    * Timely limited data was used (one ‘wave’ of cases)
+    * More countries & covid waves need to be analyzed in order to generalize the predictive        character of search data
 
 
 
